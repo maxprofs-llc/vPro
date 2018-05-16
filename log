@@ -1,0 +1,7 @@
+3-15:
+    1.创建目录结构，前后台多入口热编译环境。
+    2.创建member后台的导航条插件。
+    3.创建了公共的css文件。
+    4.创建了自己的公共插件（vpro/global.js）
+    5.公共插件引入公共函数库（vpro/functions.js）
+    6.创建API公共配置库（config/APIConfig.js）

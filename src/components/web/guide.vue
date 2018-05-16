@@ -1,0 +1,90 @@
+<template>
+    <el-row>
+        <el-col :span="24">
+            <div class="guideArea">
+                <span class="guideTitle linkTitle" @click="jumpTo('/#/index/'+nav_nickname)">{{title}}</span>
+                <span v-for="(item, i) in child" v-if="child.length" :key="i">
+                    <span class="sub_title linkTitle" @click="jumpTo('/#/index/'+item.nav_nickname)">{{item.nav_text}}</span>
+                </span>
+                <span class="more linkTitle" @click="jumpTo('/#'+nav_url)">更多 <i class="el-icon-arrow-right" style="font-size:10px;line-height:14px;"></i></span>
+            </div>
+        </el-col>
+    </el-row>
+</template>
+<style>
+    span{
+        display: inline-block;
+    }
+    .guideArea{
+        margin:20px 0 8px 0;
+    }
+    .guideTitle{
+        font-size:25px;
+    }
+    .sub_title{
+        display:inline-block;
+        padding:0px 5px 0px;
+        color:#666;
+    }
+    .linkTitle{
+        cursor:pointer;
+    }
+    .linkTitle:hover{
+        color:#FF4949;
+    }
+    .more{
+        position:absolute;
+        right:0;
+        bottom:8px;
+        font-size: 14px;
+        color:#aaa;
+    }
+</style>
+<script>
+    import {web_routerConfig} from './../../config/RouterConfig';
+    export default{
+        created(){
+//            console.log(this.child)
+        },
+        props:{
+            title:{
+                type:String,
+                default: ()=>{
+                    return ""
+                }
+            },
+            nav_nickname:{
+                type:String,
+                default: ()=>{
+                    return ""
+                }
+            },
+            child:{
+                type:Array,
+                default: ()=>{
+                    return [];
+                }
+            },
+            nav_url:{
+                type:String,
+                default:()=>{
+                    return ""
+                }
+            }
+        },
+        data(){
+            return {
+
+            }
+        },
+        methods:{
+            jumpTo(dest){
+//                web_routerConfig.push({path:dest})
+//                console.log("http://"+window.location.host+""+dest)
+//                return
+                window.open("http://"+window.location.host+dest);
+//                location.reload()
+            }
+        }
+    }
+</script>
