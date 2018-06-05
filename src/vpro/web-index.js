@@ -33,23 +33,33 @@ Vue.component('vprofooter',footer);
 Vue.component('vpronavbar',navbar);
 
 const vuex_store = new Vuex.Store({
-    state:{},
-    mutations:{},
-    actions:{},
-    modules:{
-        video: VideoModule,
-        user: UserModule,
-        comment: CommentModule,
-        index: IndexModule,
-        detail:  DetailModule,
-        category: CategoryModule,
-        player: PlayerModule
-    },
-    getters: getters
+  state:{},
+  mutations:{},
+  actions:{},
+  modules:{
+    video: VideoModule,
+    user: UserModule,
+    comment: CommentModule,
+    index: IndexModule,
+    detail:  DetailModule,
+    category: CategoryModule,
+    player: PlayerModule
+  },
+  getters: getters
 });
+
+
+//  permission judgement!---------------------------------------------------------------------------------------------
+// web_routerConfig.beforeEach((to, from, next) => {
+//
+// })
+
+// -------------------------------------------------------------------------------------------------------------------
+
+
 let hub = new Vue()
 new Vue({
-    el:'.container',
-    store:vuex_store,
-    router:web_routerConfig
+  el:'.container',
+  store:vuex_store,
+  router:web_routerConfig
 });
