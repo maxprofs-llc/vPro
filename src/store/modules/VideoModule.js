@@ -89,7 +89,7 @@ export default{
          * @param param     传递参数键
          * @returns {Promise.<TResult>}
          */
-        loadIndex(context,{url,key, request_pattern={}}){
+        /*loadIndex(context,{url,key, request_pattern={}}){
             //每次切换页面时清空页面数据，否则会有缓存之前的图片
             if(url==='' && (request_pattern.length===0 || Object.keys(request_pattern).length===0)){
                 context.commit('setVideoData', {key, data:''})
@@ -117,7 +117,7 @@ export default{
                         });
                     })
             }
-        },
+        },*/
         loadDetail(context,{url,nav,key,page=1}){
                 let loading = Vue.prototype.$loading({
                     text: '正在加载中'
@@ -236,15 +236,15 @@ export default{
         video_list(state){
             return state.videoList
         },
-        indexNav(state){
+/*        indexNav(state){
             return state.indexNav
-        },
+        },*/
         listPagination(state){
             return state.listPagination
         },
-        lessonDetail(state){
+/*        lessonDetail(state){
             return state.lessonDetail
-        },
+        },*/
         cartInfo(state){
             return state.cartInfo
         },

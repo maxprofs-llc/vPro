@@ -1,13 +1,12 @@
 <template>
     <div>
-        <swiper :options="swiperOption" ref="mySwiper">
-            <!-- slides -->
-            <swiper-slide style="background-image: url(imgs/1.jpg)">I'm Slide 1</swiper-slide>
-            <swiper-slide style="background-image: url(imgs/2.jpg)">I'm Slide 2</swiper-slide>
-            <swiper-slide style="background-image: url(imgs/3.png)">I'm Slide 3</swiper-slide>
-            <swiper-slide style="background-image: url(imgs/4.png)">I'm Slide 4</swiper-slide>
-            <swiper-slide style="background-image: url(imgs/5.png)">I'm Slide 5</swiper-slide>
-            <!-- Optional controls -->
+        <swiper :options="swiperOption" ref="mySwiper" v-if="imgs.length > 0">
+            <swiper-slide
+                    v-for="(item, i) in imgs" :key="i"
+                    :style="{
+                textAlign: 'center',
+                margin: '0 auto',
+            }"><img class="swiper-img" :src="item" alt=""></swiper-slide>
             <div class="swiper-pagination"  slot="pagination"></div>
             <div class="swiper-button-prev" slot="button-prev"></div>
             <div class="swiper-button-next" slot="button-next"></div>
@@ -16,18 +15,38 @@
 </template>
 <style>
     .swiper-container{
-        height:400px;
-        margin:0 0 30px 0;
+        height:343px;
+        /*margin:0 0 30px 0;*/
+    }
+    .swiper-img{
+        /*height:343px;*/
     }
 </style>
 <script>
     import Vue from 'vue'
+    import { mapGetters } from 'vuex'
     require('swiper/dist/css/swiper.css')
     import { swiper, swiperSlide } from 'vue-awesome-swiper'
     export default{
         name:'carousel',
+        created() {
+            this.imgs = [
+                'http://ozg76yopg.bkt.clouddn.com/1.jpg?imageView2/1/w/980/h/343/format/jpg/q/100',
+                'http://ozg76yopg.bkt.clouddn.com/2.jpg?imageView2/1/w/980/h/343/format/jpg/q/100',
+                'http://ozg76yopg.bkt.clouddn.com/3.jpg?imageView2/2/w/980/h/343/format/jpg/q/100',
+                'http://ozg76yopg.bkt.clouddn.com/4.jpg?imageView2/2/w/980/h/343/format/jpg/q/100',
+                'http://ozg76yopg.bkt.clouddn.com/5.jpg?imageView2/2/w/980/h/343/format/jpg/q/100'
+            ]
+        },
+        mounted() {
+            const that = this
+            this.swiper.on('transitionStart', function(swiper){
+                that.getRGB(that.imgs[swiper.realIndex])
+            })
+        },
         data(){
             return {
+                imgs: [],
                 swiperOption: {
                     notNextTick: true,
                     //自动播放
@@ -53,9 +72,25 @@
                 }
             }
         },
+        methods: {
+            getRGB(src) {
+                const that = this
+                RGBaster.colors(src, {
+                    success: function(payload) {
+                        that.$store.dispatch('setColor', payload.secondary)
+                    }
+                })
+            }
+        },
         components: {
             swiper,
             swiperSlide
+        },
+        computed: {
+            swiper() {
+                return this.$refs.mySwiper.swiper
+            },
+            ...mapGetters(['indexCourseList'])
         }
     }
 </script>

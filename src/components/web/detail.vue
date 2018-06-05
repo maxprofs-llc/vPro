@@ -239,12 +239,13 @@
 </style>
 <script>
     import Vue from 'vue'
+    import { mapGetters } from 'vuex'
     import {Message} from 'element-ui'
     import { web_routerConfig } from './../../config/RouterConfig'
     export default {
         created(){},
         mounted(){
-            this.$store.dispatch("loadIndex", {url:this.APIConfig.getLessonDetail, key:"lessonDetail", request_pattern:{'cid': this.$route.params.course_id}}).then(()=>{
+            this.$store.dispatch("loadLessonDetail", { request_pattern:{'cid': this.$route.params.course_id } }).then(()=>{
                 let headFlag=false
                 this.flag=true
                 let crumb=this.lessonDetail.crumb
@@ -291,9 +292,12 @@
         },
         methods:{
             enterVideo(obj) {
-//              window.open("http://"+window.location.host+"/#/play/?" + 'course_id=' + obj.lesson_course_id + '&' + 'lesson_id=' + obj.lesson_id)
               window.location.href = "http://"+window.location.host+"/#/play/?" + 'course_id=' + obj.lesson_course_id + '&' + 'lesson_id=' + obj.lesson_id
             },
+          /**
+           * 加入购物车方法：
+           * 1. 首先验证用户是否登录，如果登录了，去后台根据cart_userid获取购物车信息
+           */
             addToCart(){
                 let auth_token = localStorage.getItem('auth_token');
                 if(auth_token!=='undefined' && auth_token!==null){
@@ -369,15 +373,13 @@
             }
         },
         computed:{
-            lessonDetail(){
-                return this.$store.getters.lessonDetail;
-            },
             auth_id(){
                 return this.$store.getters.auth_id
             },
             cart_info(){
                 return this.$store.getters.cartInfo
-            }
+            },
+            ...mapGetters(['lessonDetail'])
         }
     }
 </script>

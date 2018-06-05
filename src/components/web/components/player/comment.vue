@@ -3,7 +3,7 @@
         <div class="comment-title">
             <span>评论</span>
             <hr>
-            <div class="comment-detail">
+            <div class="comment-detail" v-loading="loading">
                 <div class="comment-single">
                     <el-row :gutter="20" class="comment" v-for="(item, i) in comments" :key="i">
                         <el-col :span="4">
@@ -13,13 +13,16 @@
                         </el-col>
                         <el-col :span="20">
                             <div class="comment-summary">
-                                <span class="user-name">用户1</span>
+                                <span class="user-name">{{item.auth_appid}}</span>
                                 <span class="time">时间</span>
                             </div>
                             <div class="clearfix"></div>
                             <div class="replys" v-if="item.parent !== undefined">
+                                <div v-show="active_comments.indexOf(item.vpro_comment_id) === -1 && item.parent.length > 2" class="comment-omission">
+                                    <a @click="showOmitComments(item)"> <i class="el-icon-more"></i> 显示更多 <i class="el-icon-more"></i> </a>
+                                </div>
                                 <!-- -------------------------------------------------------------------------------- -->
-                                <el-row :gutter="20" :class="{ comment: true, replyLine: (item.parent.length !== 1) && ((item.parent.length - 1) !== k) }" v-for="(v, k) in item.parent" :key="k">
+                                <el-row :gutter="20" :class="{ comment: true, replyLine: (item.parent.length !== 1) && ((item.parent.length - 1) !== k) }" v-for="(v, k) in item.parent" :key="k" v-show="k === item.parent.length - 1 || active_comments.indexOf(item.vpro_comment_id) >= 0">
                                     <el-col :span="4">
                                         <div class="comment-avatar">
                                             <img src="http://ozg76yopg.bkt.clouddn.com/face.jpg?imageView2/1/w/50/h/50/format/jpg/interlace/1/q/75|imageslim" alt="">
@@ -27,7 +30,7 @@
                                     </el-col>
                                     <el-col :span="20">
                                         <div class="comment-summary">
-                                            <span class="user-name">用户3</span>
+                                            <span class="user-name">{{v.auth_appid}}</span>
                                             <span class="time">时间</span>
                                         </div>
                                         <div class="clearfix"></div>
@@ -55,7 +58,7 @@
                                                             v-model="reply">
                                                     </el-input>
                                                     <div style="text-align: right; margin: 5px 0 0 0">
-                                                        <el-button size="mini" type="danger" :comment_id="v.vpro_comment_id" @click="replyComment">回复评论</el-button>
+                                                        <el-button size="mini" type="danger" @click="replyComment(v)">回复评论</el-button>
                                                     </div>
                                                 </div>
                                                 <a slot="reference"><i class="el-icon-back"></i></a>
@@ -89,7 +92,7 @@
                                                 v-model="reply">
                                         </el-input>
                                         <div style="text-align: right; margin: 5px 0 0 0">
-                                            <el-button size="mini" type="danger">回复评论</el-button>
+                                            <el-button size="mini" type="danger" @click="replyComment(item)">回复评论</el-button>
                                         </div>
                                     </div>
                                     <a slot="reference"><i class="el-icon-back"></i></a>
@@ -99,6 +102,12 @@
                     </el-row>
                     <hr>
                 </div>
+                <comments-pagination
+                        class="comment-pagination"
+                        @pageChange="handlePageChange"
+                        :pageSize="this.pages.pageSize"
+                        :total="pages.total"
+                        v-if="pages.total > this.pages.pageSize"></comments-pagination>
             </div>
         </div>
     </el-card>
@@ -158,6 +167,23 @@
         border: 1px solid #ddd;
         padding: 0 10px 0 0;
     }
+    .comment-single .replys .comment-omission {
+        text-align: center;
+        color: #999;
+        font-size: 12px;
+        padding: 10px 0;
+        border: none;
+        border-top: 1px solid #eeeeee;
+        border-bottom: 1px solid #eeeeee;
+    }
+    .comment-omission a{
+        cursor: pointer;
+        text-decoration: none;
+    }
+    .comment-omission a:hover{
+        cursor: pointer;
+        color: #FF4949;
+    }
     /*.comment-single .replyLine{*/
         /*border-bottom: 1px solid #ddd;*/
     /*}*/
@@ -178,17 +204,17 @@
     .el-card{
         max-height: none !important;
     }
+    .comment-pagination{
+        text-align: center
+    }
 </style>
 <script>
+    import commentsPagination from './comments-pagination.vue'
   export default{
     mounted() {
       if (Object.keys(this.$route.query).length > 0) {
         [this.course_id, this.lesson_id] = [this.$route.query.course_id, this.$route.query.lesson_id]
-        this.getComment().then(res => {
-          this.getCommentSupportRate(res).then(res => {
-            this.addSupportRateToComments(res.data)
-          })
-        })
+        this.combineComments()
       }
     },
     data() {
@@ -196,10 +222,31 @@
         course_id: '',
         lesson_id: '',
         reply: '',
-        comments: []
+        pop_is_showed: true,
+        comments: [],
+        active_comments: [],
+        pages: {
+          currentPage: 1,
+          pageSize: 10,
+          total: -1
+        },
+        loading: false
       }
     },
+    components: {
+        commentsPagination
+    },
     methods: {
+        combineComments() {
+            this.getComment().then(res => {
+                this.getCommentSupportRate(res).then(res => {
+                    this.addSupportRateToComments(res.data)
+                })
+            })
+        },
+      handlePageChange(currentPage) {
+        this.pages.currentPage = currentPage
+      },
       agree(comment_id) {
         this.$store.dispatch('agree', { comment_id }).then(res => {
           // 给点上+1
@@ -210,14 +257,17 @@
           // 给点上+1
         })
       },
-      getCommentSupportRate(comment_ids) {
-        return this.$store.dispatch('getCommentSupportRate', { comment_ids })
+      getCommentSupportRate(comments_ids) {
+        return this.$store.dispatch('getCommentSupportRate', { comments_ids })
       },
       getComment() {
+        this.loading = true
         return new Promise((resolve, reject) => {
-          this.$store.dispatch('getComment', { 'lesson_id': this.lesson_id }).then((res) => {
+          this.$store.dispatch('getComment', { 'lesson_id': this.lesson_id, p: this.pages.currentPage }).then((res) => {
+            this.loading = false
             this.comments = res.data.comments
-            resolve(res.data.comment_ids)
+            this.pages.total = res.data.comments_length
+            resolve(res.data.comments_ids)
           }).catch(err => {
             reject(err)
           })
@@ -238,60 +288,87 @@
           [item['agree'], item['oppose']] = agree_oppose[item.vpro_comment_id]
           return item
         })
-        console.log(this.comments)
       },
-      replyComment(comment_reply_id=0, comment_reply_main_id=0) {
-        this.$store.dispatch('reply', {
-          comment_course_id: this.course_id,
-          comment_lesson_id: this.lesson_id,
-          comment_reply_id,
-          comment_reply_main_id,
+      showOmitComments(obj) {
+        if(this.active_comments.indexOf(obj.vpro_comment_id) < 0)this.active_comments.push(obj.vpro_comment_id)
+        console.log((!this.active_comments.indexOf(obj.vpro_comment_id) === -1) && obj.parent.length > 2)
+      },
+      replyComment(obj) {
+        this.$store.dispatch('setComment', {
+          comment_course_id: obj.vpro_comment_course_id,
+          comment_lesson_id: obj.vpro_comment_lesson_id,
+          comment_reply_id: obj.vpro_comment_id,
+          comment_reply_main_id: obj.vpro_comment_reply_main_id === '0' ? obj.vpro_comment_id : obj.vpro_comment_reply_main_id,
           comment_content: this.reply
         }).then(res => {
           this.$message({
             message: '回复成功',
             type: 'success'
           })
+          this.reply = ''
         }).catch(err => {
           this.$message.error('评论提交失败！')
         })
       },
       clickAgree(obj) {
-        this.changeSupportRate(obj, 'agree')
-        console.log(this.comments)
+        this.$store.dispatch('getRateForbidden', { commentId: obj.vpro_comment_id }).then(res => {
+//          console.log(obj.vpro_comment_id, res)
+          if(res >= 0) {
+            this.$message.error('您已经点过这条评论了')
+          } else {
+            this.changeSupportRate(obj, 'agree')
+          }
+        })
       },
       clickOppose(obj) {
-        this.changeSupportRate(obj, 'oppose')
+        this.$store.dispatch('getRateForbidden', { commentId: obj.vpro_comment_id }).then(res => {
+          if(res >= 0) {
+            this.$message.error('您已经点过这条评论了')
+          } else {
+            this.changeSupportRate(obj, 'oppose')
+          }
+        })
       },
-      replyComment(obj) {
-        console.log(obj)
-      },
+      /**
+       * 循环评论列表，根据被点击的评论，找到评论表里所有该id的评论，支持/反对+1
+       * 如果有parent，也要进去找
+       * @param v
+       * @param type
+       */
       changeSupportRate(v, type) {
         for (const i in this.comments) {
           if (this.comments[i].hasOwnProperty('parent')) {
             const parent = this.comments[i].parent
             for(const k in parent) {
               if (parent[k].vpro_comment_id === v.vpro_comment_id) {
-                parent[k][type] += 1
+                parent[k][type] = parseInt(parent[k][type]) + 1
                 parent.splice(k, 1, parent[k])
               }
             }
-          } else {
-            if(this.comments[i].vpro_comment_id === v.vpro_comment_id) {
-              this.comments[i][type] += 1
-              this.comments.splice(i, 1, this.comments[i])
-            }
+          }
+          if (this.comments[i].vpro_comment_id === v.vpro_comment_id) {
+            this.comments[i][type] = parseInt(this.comments[i][type]) + 1
+            this.comments.splice(i, 1, this.comments[i])
           }
         }
+        this.$store.dispatch("setCommentSupportRate", { type, comment_id: v.vpro_comment_id, lesson_id: v.vpro_comment_lesson_id }).then(res => {
+          if(parseInt(res) > 0) {
+            this.$store.dispatch('setRateForbidden', { commentId: v.vpro_comment_id })
+          }
+        })
       }
     },
     watch: {
       comments: {
         deep: true,
-        handler: (to, from) => {
-          console.log(from)
-          console.log(to)
-        }
+        handler: (to, from) => {}
+      },
+      'pages.currentPage'(to, from) {
+          if(from !== to) {
+            console.log(to)
+              this.combineComments()
+              window.scrollTo(0, 1250)
+          }
       }
     }
   }

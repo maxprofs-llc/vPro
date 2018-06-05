@@ -86,6 +86,10 @@ export const user_routerConfig=new VueRouter({
     ]
 });
 export const web_routerConfig=new VueRouter({
+    scrollBehavior: (to, from, savedPosition) => {
+        // console.log(savedPosition)
+        return { y: 0 }
+    },
     routes:[
         {path:'/',component:webIndex,name:'webIndex',redirect:'/home',
             children:[

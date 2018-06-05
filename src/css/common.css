@@ -9,7 +9,7 @@ body{
     background:#FF4949;
 }
 #navbar{
-    background-color:#FF4949;
+    /*background-color:#FF4949;*/
     width:1200px;
     margin:0 auto;
     text-align:center;
@@ -17,8 +17,6 @@ body{
 #logo{
     width:100%;
     line-height:68px;
-    /*height:68px;*/
-    /*height:68px;*/
     padding:15px 0;
 }
 #head{
@@ -26,7 +24,11 @@ body{
     top:6px;
     border-radius:14px;
 }
+#navbar .el-menu--horizontal{
+    border-bottom: none;
+}
 #navbar .el-menu{
+    border-right: none;
     background-color:#FF4949;
     height:80px;
     line-height:80px;

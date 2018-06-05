@@ -27,6 +27,13 @@ export function getCommentSupportRate(data) {
     data
   })
 }
+export function setCommentSupportRate(params) {
+  return request({
+    url: '/api/comment/set-comment-support-rate',
+    method: 'get',
+    params
+  })
+}
 export function setComment(data) {
   return request({
     url: '/api/comment/set-comment',

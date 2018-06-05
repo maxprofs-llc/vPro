@@ -1,8 +1,15 @@
-import { agree, oppose, getComment, setComment, getCommentSupportRate } from './../../api/comment'
+import { agree, oppose, getComment, setComment, getCommentSupportRate, setCommentSupportRate } from './../../api/comment'
 export default{
   state: {
     comments: [],
-    commentSupportRate: []
+    commentSupportRate: [],
+    get commentsRateForbidden() {
+      let commentsRateForbidden = localStorage.getItem('comments_rate_forbidden')
+      if(commentsRateForbidden === null || commentsRateForbidden === undefined){
+        return false;
+      }
+      return commentsRateForbidden
+    },
   },
   mutations: {
     SET_COMMENTS(state, data) {
@@ -51,6 +58,28 @@ export default{
         })
       })
     },
+    setCommentSupportRate({ commit }, data) {
+      return new Promise((resolve, reject) => {
+        setCommentSupportRate(data).then(res => {
+          resolve(res.data)
+        })
+      })
+    },
+    // 被评价过的评论无法再次点击
+    setRateForbidden(context, { commentId }) {
+      let forbidden = context.state.commentsRateForbidden
+      forbidden = forbidden ? JSON.parse(forbidden) : []
+      if(forbidden.indexOf(commentId) === -1) {
+        forbidden.push(commentId)
+        localStorage.setItem('comments_rate_forbidden', JSON.stringify(forbidden))
+      }
+    },
+    getRateForbidden(context, { commentId }) {
+      return new Promise((resolve, reject) => {
+        const forbidden = context.state.commentsRateForbidden ? JSON.parse(context.state.commentsRateForbidden) : []
+        resolve(forbidden.indexOf(commentId))
+      })
+    },
     setComment(context, data) {
       return new Promise((resolve, reject) => {
         data['user_id'] = context.getters['auth_id']
@@ -62,6 +91,5 @@ export default{
         })
       })
     }
-  },
-  getters:{}
+  }
 }

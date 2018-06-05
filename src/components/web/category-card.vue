@@ -97,9 +97,7 @@
 <script>
     import {web_routerConfig} from './../../config/RouterConfig'
     export default {
-        created(){
-
-        },
+        created(){},
         props:{
             info:{
                 type:Object,

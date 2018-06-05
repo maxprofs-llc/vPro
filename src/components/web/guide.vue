@@ -2,9 +2,13 @@
     <el-row>
         <el-col :span="24">
             <div class="guideArea">
-                <span class="guideTitle linkTitle" @click="jumpTo('/#/index/'+nav_nickname)">{{title}}</span>
+                <!--<span v-if="level" class="guideTitle linkTitle" @click="jumpTo('/#/index/'+nav_nickname)">{{title}}</span>-->
+                <span v-if="level" class="guideTitle linkTitle" @click="jumpTo('/index/'+nav_nickname)">{{title}}</span>
+                <span class="guideTitle linkTitle" v-if="!level">{{title}}</span>
                 <span v-for="(item, i) in child" v-if="child.length" :key="i">
-                    <span class="sub_title linkTitle" @click="jumpTo('/#/index/'+item.nav_nickname)">{{item.nav_text}}</span>
+                    <!--<span v-if="item.level" class="sub_title linkTitle" @click="jumpTo('/#/index/'+item.nav_nickname)">{{item.nav_text}}</span>-->
+                    <span v-if="item.level" class="sub_title linkTitle" @click="jumpTo('/index/'+item.nav_nickname)">{{item.nav_text}}</span>
+                    <span class="sub_title linkTitle" v-if="!item.level">{{item.nav_text}}</span>
                 </span>
                 <span class="more linkTitle" @click="jumpTo('/#'+nav_url)">更多 <i class="el-icon-arrow-right" style="font-size:10px;line-height:14px;"></i></span>
             </div>
@@ -43,9 +47,6 @@
 <script>
     import {web_routerConfig} from './../../config/RouterConfig';
     export default{
-        created(){
-//            console.log(this.child)
-        },
         props:{
             title:{
                 type:String,
@@ -70,7 +71,19 @@
                 default:()=>{
                     return ""
                 }
+            },
+            level: {
+                type: Boolean,
+                default: () => {
+                    return false
+                }
             }
+        },
+        created() {
+            this.child = this.child.map(res => {
+                res['level'] = res.hasOwnProperty('children')
+                return res
+            })
         },
         data(){
             return {
@@ -79,10 +92,11 @@
         },
         methods:{
             jumpTo(dest){
-//                web_routerConfig.push({path:dest})
+              console.log(dest)
+                web_routerConfig.push({ path: dest })
 //                console.log("http://"+window.location.host+""+dest)
 //                return
-                window.open("http://"+window.location.host+dest);
+//                window.open("http://"+window.location.host+dest);
 //                location.reload()
             }
         }

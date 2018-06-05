@@ -2,6 +2,7 @@
  * Created by szl4zsy on 3/15/2017.
  */
 import {KJUR, b64utoutf8} from 'jsrsasign'
+import { JSEncrypt } from 'jsencrypt'
 export default{
     getVersion(){
         return '1.0';
@@ -104,4 +105,13 @@ export default{
     removeCookie(name){
         this.setCookie(name, 1, -1);
     },
+    encrypt(data, pubKey) {
+        const jsencrypt = new JSEncrypt()
+        jsencrypt.setPublicKey(pubKey)
+        const enData = {}
+        for(const key in data) {
+            enData[key] =  jsencrypt.encrypt(data[key])
+        }
+        return enData;
+    }
 }

@@ -1,8 +1,9 @@
 /**
  * Created by SZL4ZSY on 3/15/2017.
  */
-import Vue from 'vue';
+import Vue from 'vue'
 import Axios from 'axios'
+import { userLogin } from './../../api/user'
 import {KJUR, b64utoutf8} from 'jsrsasign'
 export default{
     state:{
@@ -32,6 +33,10 @@ export default{
         },
     },
     mutations:{
+        SET_USER_DATA(state, data)
+        {
+            state.userObj = data
+        },
         setFrontData(state, {data}){
             console.log(data)
             for(let i in data){
@@ -39,7 +44,7 @@ export default{
             }
             console.log(state['userObj']);
         },
-        setLocalStorageData(state, {data}){
+        SET_LOCALSTORAGE_DATA(state, {data}){
             for(let i in data){
                 localStorage.setItem(i, data[i])
             }
@@ -109,9 +114,9 @@ export default{
         },
         userLogin(context,{url,userInfo,address}){
             Axios.post(url,userInfo).then(res=>{
-                console.log(res.data)
-                if(res!=null && res.data!=undefined && 'auth_token' in res.data){
-                    if(res.data.auth_token!=''){
+                if(res.data !== null && res.data !== undefined && 'auth_token' in res.data){
+                    if(res.data.auth_token !== ''){
+                        console.log(res.data)
                         userInfo.auth_token=res.data.auth_token
                         userInfo.auth_id=res.data.auth_id
                         for(let i in userInfo){
@@ -145,27 +150,28 @@ export default{
                 })
             }
         },
-        frontUserLogin(context, {url, data, saveKey}){
-            console.log(data)
-            Axios.post(url, data).then(res=>{
-                if(res.data){
-                    let auth_token = res.data.auth_token
-                    let payload = KJUR.jws.JWS.readSafeJSONString(b64utoutf8(res.data.auth_token.split(".")[1]))
-                    console.log(payload)
-                    if(payload.auth_id && payload.auth_appid){
-                        let userObj = {
-                            "auth_id": payload.auth_id,
-                            "auth_appid": payload.auth_appid,
-                            "auth_token": auth_token
-                        }
-                        //context.commit这里是获取一个context,其实可以简洁一些，第一个参数变成{commit}就直接从context中取到commit了
-                        context.commit('setFrontData', {data:userObj});
-                        context.commit('setLocalStorageData', {data:userObj})
-                        location.reload()
-                    }else{
-                        //错误指示
-                    }
-                }
+        frontUserLogin(context, {url, data}){
+            return new Promise((resolve, reject) => {
+                userLogin(data).then((res) => {
+                  if(res.data){
+                    const auth_token = res.data.auth_token
+                    let payload = KJUR.jws.JWS.readSafeJSONString(b64utoutf8(auth_token.split(".")[1]))
+                    if(payload.auth_id && payload.auth_appid) {
+                      let userObj = {
+                        "auth_id": payload.auth_id,
+                        "auth_appid": payload.auth_appid,
+                        "auth_token": auth_token
+                      }
+                      //context.commit这里是获取一个context,其实可以简洁一些，第一个参数变成{commit}就直接从context中取到commit了
+                      context.commit('SET_USER_DATA', {data: userObj});
+                      context.commit('SET_LOCALSTORAGE_DATA', {data: userObj})
+                      resolve(res)
+                      location.reload()
+                    } else {}
+                  }
+                }).catch(err => {
+                    reject(err)
+                })
             })
         },
         frontUserLogout(context, callback){

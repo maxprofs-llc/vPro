@@ -3,13 +3,14 @@
         <div id="navbar">
             <el-row>
                 <el-col :span="3">
-                    <img id="logo" src="/imgs/logo.png" alt="" @click="redirectToIndex" style="cursor:pointer" />
+                    <span style="font-size: 30px; color: #FFFFFF; display: inline-block; height: 80px; line-height: 80px; cursor: pointer" @click="redirectToIndex">云课堂</span>
+                    <!--<img id="logo" src="/imgs/logo.png" alt="" @click="redirectToIndex" style="cursor:pointer" />-->
                 </el-col>
                 <el-col :span="12" >
                     <el-menu></el-menu>
                 </el-col>
                 <el-col :span="9">
-                    <el-menu mode="horizontal" @select="handleSelect" :router="false">
+                    <el-menu mode="horizontal" @select="handleSelect" :router="false" background-color="#FF4949" active-text-color="#F4D19F" text-color="#FFFFFF">
                         <el-menu-item index="personal">我的学习</el-menu-item>
                         <el-menu-item index="cart">购物车</el-menu-item>
                         <el-menu-item index="message">消息</el-menu-item>
@@ -33,18 +34,18 @@
                     </el-menu>
                 </el-col>
             </el-row>
-            <modal name="demo-login" transition="pop-out" :width="modalWidth" :height="400">
+            <modal name="demo-login" transition="pop-out" :width="modalWidth" :height="400" @before-close="beforeClose">
                 <div class="box">
                     <el-tabs v-model="activeName" @tab-click="handleClick">
                         <el-tab-pane label="手机登录" name="first">
                             <el-form :model="loginByPhone" :rules="telRules" ref="loginByPhone" label-width="100px">
                                 <el-form-item label="手机号：" prop="account" >
-                                    <el-input v-model="loginByPhone.account" auto-complete="off" size="large" placeholder="请输入手机号码">
+                                    <el-input v-model="loginByPhone.account" auto-complete="off" size="large" placeholder="请输入手机号码" :disabled="true">
                                         <template slot="prepend">+86</template>
                                     </el-input>
                                 </el-form-item>
                                 <el-form-item label="密码：" prop="pass">
-                                    <el-input type="password" v-model="loginByPhone.pass" size="large" placeholder="请输入密码"></el-input>
+                                    <el-input type="password" v-model="loginByPhone.pass" size="large" placeholder="请输入密码" :disabled="true"></el-input>
                                 </el-form-item>
                                 <el-form-item>
                                     <el-button type="primary" @click="UserLogin('loginByPhone')" size="large">提交</el-button>
@@ -62,11 +63,12 @@
                                             placeholder="请输入邮箱地址"
                                             :fetch-suggestions="emailComplete"
                                             :trigger-on-focus="false"
-                                            style="width:100%"
+                                            style="width:100%"x
+                                            :disabled="true"
                                     ></el-autocomplete>
                                 </el-form-item>
                                 <el-form-item label="密码：" prop="pass">
-                                    <el-input type="password" v-model="loginByEmail.pass" size="large" placeholder="请输入密码"></el-input>
+                                    <el-input type="password" v-model="loginByEmail.pass" size="large" placeholder="请输入密码" :disabled="true"></el-input>
                                 </el-form-item>
                                 <el-form-item>
                                     <el-button type="primary" @click="UserLogin('loginByEmail')" size="large">提交</el-button>
@@ -92,6 +94,12 @@
                 </div>
             </modal>
         </div>
+        <textarea name="pubkey" ref="pubkey" cols="30" rows="10" style="display: none">-----BEGIN PUBLIC KEY-----
+MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDwYV4IPkfNau3aUVojBYAlTH0Z
+K+4qGxYpmUMvbVy/cPBl++LNZjxa18IDvrbmeBUIJK3KwbTq8STA6bEPWQUtCU7Z
++gGPuzmOJDFUttRrkHNcgA1RnBwfdSg0x4wVN0vwnNYn1Wzni9urTC3weDEYTLpF
+/DBPATaN1lnCFzwciwIDAQAB
+-----END PUBLIC KEY-----</textarea>
     </div>
 </template>
 <script>
@@ -112,7 +120,6 @@
         },
         watch:{
             $route:function(to, from){
-                console.log(to,from)
                 if(to.name !== 'index')return
                 web_routerConfig.push({path:to.path})
                 web_routerConfig.go(0)
@@ -161,7 +168,7 @@
                 isLogin:false,
                 showModal:false,
                 modalWidth: MODAL_WIDTH,
-                activeName: 'first',
+                activeName: 'third',
                 emailAds:[
                     '@qq.com',
                     '@163.com',
@@ -197,8 +204,8 @@
                     ]
                 },
                 loginByUser:{
-                    account:'',
-                    pass:'',
+                    account:'mark',
+                    pass:'Ups123',
                 },
                 userRules: {
                     account: [
@@ -260,11 +267,19 @@
 //                    web_routerConfig.push({path:"personal"})
                 }
             },
+            beforeClose(e) {
+                for(const item of ['cart', 'orders']) {
+                    if(this.$route.path.indexOf(item) >= 0) {
+                       web_routerConfig.go(-1)
+                    }
+                }
+            },
             handleClick(index, event) {
 //                console.log(index, event);
             },
             redirectToIndex(){
-                web_routerConfig.push('/home');
+//                web_routerConfig.push('/home');
+                window.location.href = '/#/home'
             },
             UserLogin(formName){
                 this.$refs[formName].validate((v)=>{
@@ -273,7 +288,8 @@
                             user_name:this[formName]['account'],
                             user_pass:this[formName]['pass'],
                         };
-                        this.$store.dispatch('frontUserLogin',{url:this.APIConfig.frontUserLogin,data:userInfo});
+                        const userEnData = this.functions.encrypt(userInfo, this.$refs.pubkey.value)
+                        this.$store.dispatch('frontUserLogin',{url:this.APIConfig.frontUserLogin,data:userEnData})
                     }else{
                         alert('userName or password must input!');
                     }

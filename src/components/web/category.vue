@@ -1,65 +1,68 @@
 <template>
     <div class="card-container">
-        <div>
-            <el-radio-group v-model="radio">
-                <el-radio-button label="上海"></el-radio-button>
-                <el-radio-button label="北京"></el-radio-button>
-                <el-radio-button label="广州"></el-radio-button>
-                <el-radio-button label="深圳"></el-radio-button>
-            </el-radio-group>
+        <coursefilter style="margin: 10px 0 0 0"></coursefilter>
+        <div style="padding: 15px 10px; background-color: #ffffff; margin: 10px 0 0 0">
+            <bread-crumb></bread-crumb>
         </div>
-        <el-row :gutter="20" v-if="flag">
-            <el-col :span="6" v-for="(item,i) in videoList" :key="i">
+        <el-row :gutter="20" v-if="coursesList.length !== 0">
+            <el-col :span="6" v-for="(item,i) in coursesList" :key="i">
                 <category-card :info="item"></category-card>
             </el-col>
         </el-row>
-        <el-pagination
-                background
-                layout="prev, pager, next"
-                :total="pageCount"
-                :current-page="1"
-                @current-change="pageChange"
-        >
-        </el-pagination>
+        <div style="margin: 10px auto; text-align: center;">
+            <el-pagination
+                    v-if="pagination !== -1"
+                    background
+                    layout="prev, pager, next"
+                    :page-count="pagination"
+                    :current-page="1"
+                    @current-change="pageChange"
+            >
+            </el-pagination>
+        </div>
     </div>
 </template>
 
 <script>
+    import { mapGetters } from 'vuex'
     import categoryCard from './category-card.vue'
+    import coursefilter from './components/category/filter.vue'
+    import breadCrumb from './components/category/breadCrumb.vue'
     export default{
-        mounted(){
-            this.$store.dispatch("loadDetail", {url:this.APIConfig.getDetail, nav:this.$route.params["nav"], key: "videoList"}).then(()=>{
-                this.$store.dispatch("loadDetail", {url:this.APIConfig.getPage, key:"listPagination", nav: this.$route.params["nav"]})
-            }).then(()=>{
-                this.flag=true
-            })
-        },
-        data(){
-            return {
-                flag:false,
-                radio:"",
-                courses_list:[],
-            }
-        },
-        methods:{
-            pageChange(page){
-                this.$store.dispatch("loadIndex", {url:"", key:"videoList"}).then(()=>{
-//                    console.log(this.videoList)
-                    this.$store.dispatch("loadDetail", {url:this.APIConfig.getDetail, nav:this.$route.params["nav"], key: "videoList", page})
-                })
-            }
-        },
-        components:{
-            categoryCard
-        },
-        computed:{
-            videoList(){
-                return this.$store.getters.video_list
-            },
-            pageCount(){
-//                console.log(this.$store.getters.listPagination)
-                return parseInt(this.$store.getters.listPagination)
-            }
+      mounted(){
+        this.navChange(this.$route.params['nav'])
+      },
+      data() {
+        return {
+            flag:false
         }
+      },
+      methods:{
+        navChange(nav) {
+          this.$store.dispatch('clearCategories').then(() => {
+            this.$store.dispatch('loadCategories', { nav }).then(() => {
+              this.$store.dispatch('getPage', { nav }).then((res) => { console.log(res) })
+            })
+          })
+        },
+        pageChange(page){
+          this.$store.dispatch('clearCategories').then(() => {
+            this.$store.dispatch('loadCategories', { nav: this.$route.params['nav'], page })
+          })
+        }
+      },
+      watch: {
+        categoryCrumb(to, from) {
+          this.navChange(to[to.length - 1].nav_url.split('/')[2])
+        }
+      },
+      components:{
+        categoryCard,
+        coursefilter,
+        breadCrumb
+      },
+      computed:{
+        ...mapGetters(['coursesList', 'pagination', 'categoryCrumb']),
+      }
     }
 </script>

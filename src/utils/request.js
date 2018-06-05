@@ -23,7 +23,15 @@ service.interceptors.request.use(config => {
 service.interceptors.response.use(
   response => {
     const res = response.data
-    return res
+    if (res.code !== 20000) {
+      Message({
+        message: res.data,
+        type: 'error',
+        duration: 5 * 1000
+      })
+    } else {
+      return response.data
+    }
   },
   error => {
     console.log('err' + error)// for debug
@@ -32,7 +40,7 @@ service.interceptors.response.use(
       type: 'error',
       duration: 5 * 1000
     })
-    return Promise.reject(error)
+    return Promise.reject('error')
   }
 )
 export default service

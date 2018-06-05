@@ -1,37 +1,49 @@
 import 'babel-polyfill'
+import ElementUI from 'element-ui'
+import 'element-ui/lib/theme-chalk/index.css';
+// import './../webapp/theme/index.css';
+import './../css/common.css';
 import Vue from 'vue'
 import Vuex from 'vuex';
 import VueRouter from 'vue-router';
-import ElementUI from 'element-ui'
-import 'element-ui/lib/theme-chalk/index.css';
-import './../css/common.css';
 import global from './global';
 import navbar from './../components/web/navbar.vue'
+import footer from './../components/web/components/footer.vue'
 import modal from 'vue-js-modal'
+
 import VideoModule from './../store/modules/VideoModule';
 import UserModule from './../store/modules/UserModule';
 import CommentModule from './../store/modules/CommentModule';
+import IndexModule from './../store/modules/IndexModule';
+import DetailModule from "../store/modules/DetailModule";
+import CategoryModule from "../store/modules/CategoryModule";
+
 import {web_routerConfig} from './../config/RouterConfig';
 import { getters } from './../store/getters'
 require('./extend')
+require('rgbaster/rgbaster.js')
 
-Vue.use(Vuex);
 Vue.use(ElementUI);
+Vue.use(Vuex);
 Vue.use(global);
 Vue.use(VueRouter);
 Vue.use(modal);
-Vue.component('navbar',navbar);
+Vue.component('vprofooter',footer);
+Vue.component('vpronavbar',navbar);
 
-const vuex_store=new Vuex.Store({
+const vuex_store = new Vuex.Store({
     state:{},
     mutations:{},
     actions:{},
     modules:{
         video:VideoModule,
         user:UserModule,
-        comment: CommentModule
+        comment: CommentModule,
+        index: IndexModule,
+        detail:  DetailModule,
+        category: CategoryModule
     },
-    getters
+    getters: getters
 });
 let hub = new Vue()
 new Vue({
