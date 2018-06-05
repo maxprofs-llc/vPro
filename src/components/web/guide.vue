@@ -10,7 +10,8 @@
                     <span v-if="item.level" class="sub_title linkTitle" @click="jumpTo('/index/'+item.nav_nickname)">{{item.nav_text}}</span>
                     <span class="sub_title linkTitle" v-if="!item.level">{{item.nav_text}}</span>
                 </span>
-                <span class="more linkTitle" @click="jumpTo('/#'+nav_url)">更多 <i class="el-icon-arrow-right" style="font-size:10px;line-height:14px;"></i></span>
+                <!--<span class="more linkTitle" @click="open('/#' + nav_url)">更多 <i class="el-icon-arrow-right" style="font-size:10px;line-height:14px;"></i></span>-->
+                <span class="more linkTitle" @click="jumpTo(nav_url)">更多 <i class="el-icon-arrow-right" style="font-size:10px;line-height:14px;"></i></span>
             </div>
         </el-col>
     </el-row>
@@ -91,14 +92,13 @@
             }
         },
         methods:{
-            jumpTo(dest){
-              console.log(dest)
-                web_routerConfig.push({ path: dest })
-//                console.log("http://"+window.location.host+""+dest)
-//                return
-//                window.open("http://"+window.location.host+dest);
-//                location.reload()
-            }
+          jumpTo(dest){
+            console.log(dest)
+            web_routerConfig.push({ path: dest })
+          },
+          open(dest) {
+            window.open("http://"+window.location.host+dest);
+          }
         }
     }
 </script>

@@ -37,6 +37,7 @@
     mounted() {
       this.$store.dispatch('getNavTree').then(res => {
         this.subNav = res[0]['children']
+        this.$store.dispatch('setCategoryCrumb', this.iterCrumb())
       })
 //      this.$route.params['nav']
     },
@@ -54,6 +55,32 @@
       }
     },
     methods: {
+      iterCrumb(res=[], navTree=this.navTree, nav = this.$route.params['nav']) {
+        for(let item of navTree)
+        {
+          if (item.nav_nickname === nav)
+          {
+            res.unshift({
+              nav_text: item.nav_text,
+              nav_url: item.nav_url
+            })
+            return res
+          }
+          if (item.hasOwnProperty('children'))
+          {
+            res = this.iterCrumb(res, item.children)
+          }
+          if (res.length > 0)
+          {
+            res.unshift({
+              nav_text: item.nav_text,
+              nav_url: item.nav_url
+            })
+            return res
+          }
+        }
+        return res
+      },
       subNavChange(item, key, level)
       {
         if(level !== 2) {

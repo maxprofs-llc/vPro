@@ -41,6 +41,10 @@
         width:840.5px;
         height:283px;
     }
+    .multimenu-main a:hover {
+        color: #FF4949;
+        transition: color 0.2s;
+    }
     .hot-list {
         display: inline-block;
     }

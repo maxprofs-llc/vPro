@@ -241,10 +241,10 @@ K+4qGxYpmUMvbVy/cPBl++LNZjxa18IDvrbmeBUIJK3KwbTq8STA6bEPWQUtCU7Z
             },
             handleSelect(key, keyPath) {
 //                console.log(key, keyPath);
-                if(key=="logout"){
+                if(key === "logout"){
                     this.logout();
                 }else{
-                    web_routerConfig.push({path:key})
+                    web_routerConfig.push({ path: '/' + key })
                 }
             },
             login(){
