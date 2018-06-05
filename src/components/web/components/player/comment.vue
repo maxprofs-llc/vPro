@@ -5,7 +5,7 @@
             <hr>
             <div class="comment-detail" v-loading="loading">
                 <div class="comment-single">
-                    <el-row :gutter="20" class="comment" v-for="(item, i) in comments" :key="i">
+                    <el-row :gutter="20" class="comment" v-for="(item, i) in comments" :key="i" v-if="comments.length">
                         <el-col :span="4">
                             <div class="comment-avatar">
                                 <img src="http://ozg76yopg.bkt.clouddn.com/face.jpg?imageView2/1/w/50/h/50/format/jpg/interlace/1/q/75|imageslim" alt="">
@@ -15,7 +15,7 @@
                             <div class="comment-summary">
                                 <span class="user-name">{{item.auth_appid}}</span>
                                 <span class="time">时间</span>
-                            </div>
+                            </div>-
                             <div class="clearfix"></div>
                             <div class="replys" v-if="item.parent !== undefined">
                                 <div v-show="active_comments.indexOf(item.vpro_comment_id) === -1 && item.parent.length > 2" class="comment-omission">
@@ -97,6 +97,13 @@
                                     </div>
                                     <a slot="reference"><i class="el-icon-back"></i></a>
                                 </el-popover>
+                            </div>
+                        </el-col>
+                    </el-row>
+                    <el-row v-if="!comments.length">
+                        <el-col :span="24">
+                            <div style="color: #cccccc; text-align: center; padding: 20px 0;">
+                                <span>还未有人评论~</span>
                             </div>
                         </el-col>
                     </el-row>
@@ -238,11 +245,13 @@
     },
     methods: {
         combineComments() {
-            this.getComment().then(res => {
-                this.getCommentSupportRate(res).then(res => {
-                    this.addSupportRateToComments(res.data)
-                })
-            })
+          this.getComment().then(res => {
+            if(res.comments_length > 0) {
+              this.getCommentSupportRate(res).then(res => {
+                this.addSupportRateToComments(res.data)
+              })
+            }
+          })
         },
       handlePageChange(currentPage) {
         this.pages.currentPage = currentPage

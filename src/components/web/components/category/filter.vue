@@ -1,13 +1,13 @@
 <template>
     <div v-if="navTree.length > 0" class="filter">
         <ul>
-            <li v-for="(item, i) in navTree" :key="i" @mouseenter="subNavChange(item, i, 0)" :class="{ 'selectNav': key0===i }" @click="handleClick(0)">{{item.nav_text}}</li>
+            <li v-for="(item, i) in navTree" :key="i" @mouseenter="subNavChange(item, i, 0)" :class="{ 'selectNav': key0===i }" @click="handleClick(0, item)">{{item.nav_text}}</li>
         </ul>
         <ul>
-            <li v-for="(item, i) in subNav1" :key="i" @mouseenter="subNavChange(item, i, 1)" :class="{ 'selectNav': key1===i }" @click="handleClick(1)">{{item.nav_text}}</li>
+            <li v-for="(item, i) in subNav1" :key="i" @mouseenter="subNavChange(item, i, 1)" :class="{ 'selectNav': key1===i }" @click="handleClick(1, item)">{{item.nav_text}}</li>
         </ul>
         <ul>
-            <li v-for="(item, i) in subNav2" :key="i" @mouseenter="subNavChange(item, i, 2)" :class="{ 'selectNav': key2===i }" @click="handleClick(2)">{{item.nav_text}}</li>
+            <li v-for="(item, i) in subNav2" :key="i" @mouseenter="subNavChange(item, i, 2)" :class="{ 'selectNav': key2===i }" @click="handleClick(2, item)">{{item.nav_text}}</li>
         </ul>
 
     </div>
@@ -33,6 +33,7 @@
 </style>
 <script>
   import { mapGetters } from 'vuex'
+  import { web_routerConfig } from './../../../../config/RouterConfig'
   export default {
     mounted() {
       this.$store.dispatch('getNavTree').then(res => {
@@ -97,15 +98,17 @@
           this.subNav2 = []
         }
       },
-      handleClick(level) {
+      handleClick(level, item) {
+        web_routerConfig.push({ path: item.nav_url })
+        return
         this.originBreadCrumb = this.breadCrumb.slice(0, level+1)
         this.$store.dispatch('setCategoryCrumb', this.originBreadCrumb)
 
       }
     },
     watch: {
-      subNav(to, from) {
-
+      $route(to, from) {
+        location.reload()
       }
     },
     computed: {

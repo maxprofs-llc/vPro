@@ -24,14 +24,14 @@ export default{
     }
   },
   actions: {
-    loadCategories({ commit }, { nav, page=1 }){
+    loadCategories(context, { nav, page=1 }){
       let loading = Vue.prototype.$loading({
         text: '正在加载中'
       });
       return new Promise((resolve, reject) => {
-        loadCategory({ category: nav, p: page }).then((res) => {
+        loadCategory({ category: context.state.categoryCrumb[context.state.categoryCrumb.length - 1]['nav_url'].split('/')[2], p: page }).then((res) => {
           loading.close()
-          commit('SET_COURSESLIST', res.data)
+          context.commit('SET_COURSESLIST', res.data)
           resolve(res.data)
         }).catch( err => {
           loading.close()
@@ -66,6 +66,9 @@ export default{
     },
     setCategoryCrumb({ commit }, data) {
       commit('SET_CATEGORYCRUMB', data)
+    },
+    clearPage({ commit }, data) {
+      commit('SET_PAGINATION', -1)
     }
   },
   getters: {

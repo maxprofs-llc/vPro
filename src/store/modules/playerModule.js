@@ -1,4 +1,5 @@
 import { agree, reject } from './../../api/comment'
+import { getLessonsList } from './../../api/player'
 export default{
   state: {
     playerInfo: {
@@ -7,14 +8,17 @@ export default{
   },
   mutations: {
     SET_LESSONSLIST(state, data) {
-
+      state['playerInfo']['lessonsList'] = data
     }
   },
   actions: {
-    getCourseLessonsList() {
+    getLessonsList({ commit }, data) {
       return new Promise((resolve, reject) => {
-        getCourseLessonsList().then(res => {
-
+        getLessonsList(data).then(res => {
+          commit('SET_LESSONSLIST', res.data)
+          resolve(res.data)
+        }).catch(err => {
+          reject(err)
         })
       })
     },
@@ -37,5 +41,7 @@ export default{
       })
     },
   },
-  getters:{}
+  getters:{
+    lessonsList: state => state.playerInfo.lessonsList
+  }
 }

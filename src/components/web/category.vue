@@ -9,6 +9,13 @@
                 <category-card :info="item"></category-card>
             </el-col>
         </el-row>
+        <el-row v-if="coursesList.length === 0">
+            <el-col :span="24">
+                <div style="padding: 30px 0; text-align: center; color: #CCCCCC; background-color: #FFFFFF">
+                    空空如也~
+                </div>
+            </el-col>
+        </el-row>
         <div style="margin: 10px auto; text-align: center;">
             <el-pagination
                     v-if="pagination !== -1"
@@ -39,6 +46,7 @@
       },
       methods:{
         navChange(nav) {
+          this.$store.dispatch('clearPage')
           this.$store.dispatch('clearCategories').then(() => {
             this.$store.dispatch('loadCategories', { nav }).then(() => {
               this.$store.dispatch('getPage', { nav }).then((res) => { console.log(res) })
@@ -47,7 +55,10 @@
         },
         pageChange(page){
           this.$store.dispatch('clearCategories').then(() => {
-            this.$store.dispatch('loadCategories', { nav: this.$route.params['nav'], page })
+//            this.$store.dispatch('loadCategories', { nav: this.$route.params['nav'], page })
+            this.$store.dispatch('loadCategories', { nav: this.$route.params['nav'], page }).then(() => {
+              window.scrollTo(0, 0)
+            })
           })
         }
       },

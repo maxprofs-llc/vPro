@@ -20,6 +20,7 @@ import CategoryModule from "../store/modules/CategoryModule";
 
 import {web_routerConfig} from './../config/RouterConfig';
 import { getters } from './../store/getters'
+import PlayerModule from "../store/modules/playerModule";
 require('./extend')
 require('rgbaster/rgbaster.js')
 
@@ -36,12 +37,13 @@ const vuex_store = new Vuex.Store({
     mutations:{},
     actions:{},
     modules:{
-        video:VideoModule,
-        user:UserModule,
+        video: VideoModule,
+        user: UserModule,
         comment: CommentModule,
         index: IndexModule,
         detail:  DetailModule,
-        category: CategoryModule
+        category: CategoryModule,
+        player: PlayerModule
     },
     getters: getters
 });
