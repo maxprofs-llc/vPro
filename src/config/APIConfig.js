@@ -22,7 +22,7 @@ export default{
     loadCart:"http://223.112.88.211:9696/index.php/api/cart/usercart",
     addCart:"http://223.112.88.211:9696/index.php/api/cart/addcart",
     checkCourses:"http://223.112.88.211:9696/index.php/api/product/checkcourses",
-    getCoupon:"http://223.112.88.211:9696/index.php/api/coupon/getcoupon",
+    // getCoupon:"http://223.112.88.211:9696/index.php/api/coupon/getcoupon",
     putOrder:"http://223.112.88.211:9696/index.php/api/order/put-order",
     getOrder:"http://223.112.88.211:9696/index.php/api/order/get-order",
 }

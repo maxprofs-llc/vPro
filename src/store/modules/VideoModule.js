@@ -80,44 +80,6 @@ export default{
             context.commit('setVideoData',{key:"edit_video_info",data:data})
             routerConfig.push({path:'/pub'});
         },
-        /**
-         *
-         * @param context
-         * @param url       请求地址
-         * @param key       vuex存储名字
-         * @param nav       传递参数值
-         * @param param     传递参数键
-         * @returns {Promise.<TResult>}
-         */
-        /*loadIndex(context,{url,key, request_pattern={}}){
-            //每次切换页面时清空页面数据，否则会有缓存之前的图片
-            if(url==='' && (request_pattern.length===0 || Object.keys(request_pattern).length===0)){
-                context.commit('setVideoData', {key, data:''})
-                return Promise
-            }
-            url=url+'?token='+context.rootState.user.userObj.auth_token
-            let auth_token=context.rootState.user.userObj.auth_token
-            if(context.state[key].length===0 || Object.keys(context.state[key]).length === 0){
-                let loading=Vue.prototype.$loading({
-                    text:'正在加载中'
-                });
-                return Axios.get(url, {
-                    timeout:5000,
-                    params:request_pattern
-                }).then(
-                    res=>{
-                        loading.close();
-                        context.commit('setVideoData',{key:key,data:res.data})
-                    }).catch(
-                    err=>{
-                        loading.close();
-                        Vue.prototype.$notify.error({
-                            title: '错误',
-                            message: '数据未成功加载！'
-                        });
-                    })
-            }
-        },*/
         loadDetail(context,{url,nav,key,page=1}){
                 let loading = Vue.prototype.$loading({
                     text: '正在加载中'
@@ -142,18 +104,6 @@ export default{
                     });
                 })
         },
-        // loadCart(context, {url, data, key}){
-        //     return Axios.get(url, {
-        //         timeout:5000,
-        //         params:data
-        //     }).then(res=>{
-        //         let list = res.data.map(item=>{
-        //             return JSON.parse(item)
-        //         })
-        //         console.table(list)
-        //         context.commit('setVideoData', {key:key, data:list})
-        //     })
-        // },
         addToCart(context, {url, data}){
             return Axios.post(url,data).then(res=>{
                 if(res.data.hasOwnProperty("status")){
@@ -165,12 +115,6 @@ export default{
                 console.log(err)
             })
         },
-        // checkData(context, {url, data, key}){
-        //     return Axios.post(url, data).then(res=>{
-        //         console.log(res.data)
-        //         context.commit('setVideoData', {key:key, data:res.data})
-        //     })
-        // },
         putOrder(context, {url, data, key}){
             return Axios.post(url, data).then(res=>{
                 console.log(res.data)
@@ -235,12 +179,6 @@ export default{
         },
         video_list(state){
             return state.videoList
-        },
-        listPagination(state){
-            return state.listPagination
-        },
-        couponInfo(state){
-            return state.couponInfo
         },
         payment(state){
             return state.payment

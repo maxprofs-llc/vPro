@@ -269,19 +269,17 @@
     methods:{
       handleClick(tab, event) {
         if(tab.$el.id==="pane-vaild"){
-          this.$store.dispatch('checkData', {url:this.APIConfig.getCoupon, data: {
-            user_id:localStorage.getItem('auth_id')
-          }, key:'couponInfo'}).then(()=>{
-            console.log(this.coupon_info)
+          this.$store.dispatch('getCoupon', { user_id: this.auth_id }).then(() => {
+            console.log(this.couponInfo)
           })
         }
       },
       selectDiscount(o, is_matched){
         if(is_matched){
           if(this.discount_selected < 0){
-            this.discount_selected=o;
+            this.discount_selected = o;
             this.order_price.order_coupon_discount=this.coupon_info[o]['coupon_discount']
-          }else if(o>=0 && this.discount_selected>=0&&o!==this.discount_selected){
+          }else if(o >= 0 && this.discount_selected >= 0 && o !== this.discount_selected){
             this.discount_selected=o;
             this.order_price.order_coupon_discount=this.coupon_info[o]['coupon_discount']
           }else{
@@ -309,15 +307,15 @@
               data:{
                 user_id:auth_id,
                 order_course_ids:cart_ids,
-                order_coupon_used:this.discount_selected,
-                order_price:{
-                  course_price:this.course_price,
-                  coupon_discount:this.order_price.order_coupon_discount,
-                  money_return:this.order_price.order_money_return,
+                order_coupon_used: this.discount_selected,
+                order_price: {
+                  course_price: this.course_price,
+                  coupon_discount: this.order_price.order_coupon_discount,
+                  money_return: this.order_price.order_money_return,
                 }
               },
               key:'orderInfo'
-            }).then(()=>{
+            }).then(() => {
               console.log('insert')
               this.step = 2
               let info = {}
@@ -343,16 +341,16 @@
       }
     },
     computed:{
-      ...mapGetters(['orderInfo']),
+      ...mapGetters(['orderInfo', 'auth_id', 'couponInfo']),
       coupon_info(){
         let coupon_info = []
         if(this.$store.getters.couponInfo.length>0){
           coupon_info=this.$store.getters.couponInfo
           let date=new Date()
-          for(let i in coupon_info){
-            coupon_info[i]['coupon_is_matched'] = coupon_info[i]['coupon_limit'] > this.course_price ? false : true
-            for(let k in coupon_info[i]){
-              if(k.indexOf('date')>=0){
+          for(let i in coupon_info) {
+            coupon_info[i]['coupon_is_matched'] = coupon_info[i]['coupon_limit'] <= this.course_price
+            for(let k in coupon_info[i]) {
+              if(k.indexOf('date') >= 0){
                 date.setTime(coupon_info[i][k]*1000)
                 console.log(
                   date.getYear()+1900,
@@ -366,10 +364,10 @@
         }
         return coupon_info
       },
-      //课程总价
+      //计算课程总价
       course_price(){
-        let price=0;
-        this.orderInfo.map(item=>{
+        let price = 0;
+        this.orderInfo.map(item => {
           price += parseFloat(item.course_price)
         })
         return price.toFixed(2);

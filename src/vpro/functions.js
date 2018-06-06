@@ -111,5 +111,28 @@ export default{
       enData[key] =  jsencrypt.encrypt(data[key])
     }
     return enData;
-  }
+  },
+  // 判断优惠券是否符合限制（金额限制和时间限制）
+  coupon_info(originCouponInfo, ) {
+    let couponInfo = []
+    if(originCouponInfo.length > 0){
+      let date=new Date()
+      for(let i in couponInfo) {
+        // 判断优惠券的金额是否满足限制
+        couponInfo[i]['coupon_is_matched'] = couponInfo[i]['coupon_limit'] <= this.course_price
+        for(let k in couponInfo[i]) {
+          if(k.indexOf('date') >= 0){
+            date.setTime(couponInfo[i][k] * 1000)
+            console.log(
+              date.getYear()+1900,
+              date.getMonth()+1,
+              date.getDate()
+            )
+            couponInfo[i][k]=(date.getYear()+1900)+' 年 '+ (date.getMonth()+1)+' 月 '+ (date.getDate()) + ' 日 '
+          }
+        }
+      }
+    }
+    return couponInfo
+  },
 }
