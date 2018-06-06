@@ -34,7 +34,7 @@ export default{
         couponInfo: [],
         //最后的购买信息
         payment: {
-            payUrl: false,
+            payUrl: true,
         },
         edit_video_info:[],
         videoDetail:{},
@@ -142,18 +142,18 @@ export default{
                     });
                 })
         },
-        loadCart(context, {url, data, key}){
-            return Axios.get(url, {
-                timeout:5000,
-                params:data
-            }).then(res=>{
-                let list = res.data.map(item=>{
-                    return JSON.parse(item)
-                })
-                console.table(list)
-                context.commit('setVideoData', {key:key, data:list})
-            })
-        },
+        // loadCart(context, {url, data, key}){
+        //     return Axios.get(url, {
+        //         timeout:5000,
+        //         params:data
+        //     }).then(res=>{
+        //         let list = res.data.map(item=>{
+        //             return JSON.parse(item)
+        //         })
+        //         console.table(list)
+        //         context.commit('setVideoData', {key:key, data:list})
+        //     })
+        // },
         addToCart(context, {url, data}){
             return Axios.post(url,data).then(res=>{
                 if(res.data.hasOwnProperty("status")){
@@ -165,12 +165,12 @@ export default{
                 console.log(err)
             })
         },
-        checkData(context, {url, data, key}){
-            return Axios.post(url, data).then(res=>{
-                console.log(res.data)
-                context.commit('setVideoData', {key:key, data:res.data})
-            })
-        },
+        // checkData(context, {url, data, key}){
+        //     return Axios.post(url, data).then(res=>{
+        //         console.log(res.data)
+        //         context.commit('setVideoData', {key:key, data:res.data})
+        //     })
+        // },
         putOrder(context, {url, data, key}){
             return Axios.post(url, data).then(res=>{
                 console.log(res.data)
@@ -236,20 +236,8 @@ export default{
         video_list(state){
             return state.videoList
         },
-/*        indexNav(state){
-            return state.indexNav
-        },*/
         listPagination(state){
             return state.listPagination
-        },
-/*        lessonDetail(state){
-            return state.lessonDetail
-        },*/
-        cartInfo(state){
-            return state.cartInfo
-        },
-        orderInfo(state){
-            return state.orderInfo
         },
         couponInfo(state){
             return state.couponInfo

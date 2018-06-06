@@ -1,44 +1,4 @@
 <template>
-   <!-- <el-table
-            :data="orders_detail"
-            style="width: 100%">
-        <el-table-column
-                prop="orders_name"
-                label="订单信息"
-                width="500">
-        </el-table-column>
-        <el-table-column
-                prop="price"
-                label="单价（元）"
-                width="130">
-        </el-table-column>
-        <el-table-column
-                prop="total_price"
-                label="金额（元）"
-                width="130">
-        </el-table-column>
-        <el-table-column
-                prop="orders_course_ops"
-                label="课程操作"
-                width="155">
-        </el-table-column>
-        <el-table-column
-                prop="orders_trade_status"
-                label="交易状态"
-                width="130">
-        </el-table-column>
-        <el-table-column
-                prop="orders_trade_ops"
-                label="交易操作"
-                width="155"
-                >
-        </el-table-column>
-        <el-table-column>
-        <template slot-scope="scope">
-            <image :src="scope.row.image" width="80" height="80"/>
-        </template>
-        </el-table-column>
-    </el-table>-->
     <div>
         <div v-if="orders_detail" v-for="(items, i) in orders_detail" :key="i">
             <el-card class="orders-card">
@@ -101,22 +61,21 @@
     }
 </style>
 <script>
-    export default {
-        mounted(){
-
-        },
-        props:{
-            orders_detail:{
-                type:Object,
-                default: ()=>{
-                    return {};
-                }
-            },
-        },
-        data: () => {
-            return {
-                msg: 'hello vue'
-            }
-        },
-    }
+  export default {
+    mounted(){
+    },
+    props:{
+      orders_detail:{
+        type:Object,
+        default: ()=>{
+          return {};
+        }
+      },
+    },
+    data: () => {
+      return {
+        msg: 'hello vue'
+      }
+    },
+  }
 </script>

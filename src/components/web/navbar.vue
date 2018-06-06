@@ -25,7 +25,6 @@
                                 <el-dropdown-menu slot="dropdown" size="medium" click="">
                                     <el-dropdown-item command="">我的消息</el-dropdown-item>
                                     <el-dropdown-item command="orders">我的订单</el-dropdown-item>
-                                    <el-dropdown-item>螺蛳粉</el-dropdown-item>
                                     <el-dropdown-item divided command="logout">退出</el-dropdown-item>
                                 </el-dropdown-menu>
                             </el-dropdown>

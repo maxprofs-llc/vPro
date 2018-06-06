@@ -22,7 +22,7 @@
                 </el-col>
             </el-row>
             <hr class="bottom-line" />
-            <div class="course_detail" v-for="item in order_info">
+            <div class="course_detail" v-for="item in orderInfo">
                 <el-row :gutter="20">
                     <el-col :span="7">
                         <div>
@@ -239,158 +239,148 @@
     }
 </style>
 <script>
-    import {web_routerConfig} from './../../config/RouterConfig'
-    export default {
-        created(){
-            if(this.order_info.length===0) {
-                let cart_ids = this.functions.checkLocalData('cart_ids')
-                console.log(cart_ids)
-                return
-                if (cart_ids) {
-                    this.$store.dispatch('checkData', {
-                        url: this.APIConfig.checkCourses,
-                        data: {order_course_ids: cart_ids},
-                        key: 'orderInfo'
-                    })
-                }else{
-                    console.log("购物车过期或为空")
-                }
-            }
-        },
-        mounted(){
-
-        },
-        data: () => {
-            return {
-                initLabel:"",
-                discount_selected:false,
-                order_price:{
-                    order_coupon_discount:0,
-                    order_money_return:0,
-                },
-                warning_dialog:false,
-                step: 1
-            }
-        },
-        methods:{
-            handleClick(tab, event) {
-                if(tab.$el.id==="pane-vaild"){
-                    this.$store.dispatch('checkData', {url:this.APIConfig.getCoupon, data:{
-                        user_id:localStorage.getItem('auth_id')
-                    }, key:'couponInfo'}).then(()=>{
-                        console.log(this.coupon_info)
-                    })
-                }
-            },
-            selectDiscount(o, is_matched){
-                if(is_matched){
-                    if(this.discount_selected < 0){
-                        this.discount_selected=o;
-                        this.order_price.order_coupon_discount=this.coupon_info[o]['coupon_discount']
-                    }else if(o>=0 && this.discount_selected>=0&&o!==this.discount_selected){
-                        this.discount_selected=o;
-                        this.order_price.order_coupon_discount=this.coupon_info[o]['coupon_discount']
-                    }else{
-                        this.discount_selected=-1;
-                        this.order_price.order_coupon_discount=0
-                    }
-                }
-            },
-            /**
-             * 最终下单：
-             * 首先判断token是否过期
-             * 判断订单是否有课程
-             * 判断价格是否大于0
-             *
-             */
-            putOrder(){
-                let auth_id = localStorage.getItem('auth_id')
-                let auth_token = localStorage.getItem('auth_token')
-                let cart_ids = JSON.parse(this.functions.getLocalData('cart_ids'))
-                if(auth_id && auth_token && cart_ids.length>0){
-                    //判断价值量大于0并且订单信息存在，
-                    if(this.order_info.length > 0 && this.summary_price >= 0){
-                        this.$store.dispatch('checkData', {
-                            url:this.APIConfig.checkCourses,
-                            data:{
-                                    user_id:auth_id,
-                                    order_course_ids:cart_ids,
-                                    order_coupon_used:this.discount_selected,
-                                    order_price:{
-                                        course_price:this.course_price,
-                                        coupon_discount:this.order_price.order_coupon_discount,
-                                        money_return:this.order_price.order_money_return,
-                                    }
-                                },
-                            key:'orderInfo'
-                        }).then(()=>{
-                            console.log('insert')
-                            this.step = 2
-                            let info = {}
-                            info.user_id = localStorage.getItem("auth_id")
-                            info.order_course_ids = JSON.parse(this.functions.getLocalData('cart_ids'))
-                            info.cart_parent_id = this.functions.getLocalData("cart_parent_id");
-                            info.course_price = this.course_price
-                            info.order_coupon_discount=this.order_price.order_coupon_discount
-                            info.order_coupon_selected = this.discount_selected
-                            this.$store.dispatch('putOrder', {
-                                url:this.APIConfig.putOrder,
-                                data:info,
-                            })
-                        }).then(()=>{
-
-                        })
-                    }
-                }
-//                this.warning_dialog=true
-            },
-            backToCart(){
-                this.warning_dialog=false
-                web_routerConfig.push({'path':'/cart'})
-            }
-        },
-        computed:{
-            order_info(){
-                return this.$store.getters.orderInfo
-            },
-            coupon_info(){
-                let coupon_info = []
-                if(this.$store.getters.couponInfo.length>0){
-                    coupon_info=this.$store.getters.couponInfo
-                    let date=new Date()
-                    for(let i in coupon_info){
-                        coupon_info[i]['coupon_is_matched']=coupon_info[i]['coupon_limit'] > this.course_price?false:true
-                        for(let k in coupon_info[i]){
-                            if(k.indexOf('date')>=0){
-                                date.setTime(coupon_info[i][k]*1000)
-                                console.log(
-                                    date.getYear()+1900,
-                                    date.getMonth()+1,
-                                    date.getDate()
-                                )
-                                coupon_info[i][k]=(date.getYear()+1900)+' 年 '+ (date.getMonth()+1)+' 月 '+ (date.getDate()) + ' 日 '
-                            }
-                        }
-                    }
-                }
-                return coupon_info
-            },
-            //课程总价
-            course_price(){
-                let price=0;
-                this.order_info.map(item=>{
-                    price += parseFloat(item.course_price)
-                })
-                return price.toFixed(2);
-            },
-            //获得最终总价
-            summary_price(){
-                return parseFloat(this.course_price - this.order_price.order_coupon_discount).toFixed(2);
-            },
-            payment(){
-                return this.$store.getters.payment
-            }
+  import {web_routerConfig} from './../../config/RouterConfig'
+  import { mapGetters } from 'vuex'
+  export default {
+    created() {
+      if(this.orderInfo.length !== 0) {
+        let cart_ids = this.functions.checkLocalData('cart_ids')
+        if (cart_ids) {
+          this.$store.dispatch('checkCourses', { order_course_ids: cart_ids })
+        } else {
+          console.log("购物车过期或为空")
         }
-
+      }
+    },
+    mounted(){
+    },
+    data: () => {
+      return {
+        initLabel:"",
+        discount_selected:false,
+        order_price:{
+          order_coupon_discount:0,
+          order_money_return:0,
+        },
+        warning_dialog:false,
+        step: 1
+      }
+    },
+    methods:{
+      handleClick(tab, event) {
+        if(tab.$el.id==="pane-vaild"){
+          this.$store.dispatch('checkData', {url:this.APIConfig.getCoupon, data: {
+            user_id:localStorage.getItem('auth_id')
+          }, key:'couponInfo'}).then(()=>{
+            console.log(this.coupon_info)
+          })
+        }
+      },
+      selectDiscount(o, is_matched){
+        if(is_matched){
+          if(this.discount_selected < 0){
+            this.discount_selected=o;
+            this.order_price.order_coupon_discount=this.coupon_info[o]['coupon_discount']
+          }else if(o>=0 && this.discount_selected>=0&&o!==this.discount_selected){
+            this.discount_selected=o;
+            this.order_price.order_coupon_discount=this.coupon_info[o]['coupon_discount']
+          }else{
+            this.discount_selected=-1;
+            this.order_price.order_coupon_discount=0
+          }
+        }
+      },
+      /**
+       * 最终下单：
+       * 首先判断token是否过期
+       * 判断订单是否有课程
+       * 判断价格是否大于0
+       *
+       */
+      putOrder(){
+        let auth_id = localStorage.getItem('auth_id')
+        let auth_token = localStorage.getItem('auth_token')
+        let cart_ids = JSON.parse(this.functions.getLocalData('cart_ids'))
+        if(auth_id && auth_token && cart_ids.length>0){
+          //判断价值量大于0并且订单信息存在，
+          if(this.orderInfo.length > 0 && this.summary_price >= 0){
+            this.$store.dispatch('checkData', {
+              url:this.APIConfig.checkCourses,
+              data:{
+                user_id:auth_id,
+                order_course_ids:cart_ids,
+                order_coupon_used:this.discount_selected,
+                order_price:{
+                  course_price:this.course_price,
+                  coupon_discount:this.order_price.order_coupon_discount,
+                  money_return:this.order_price.order_money_return,
+                }
+              },
+              key:'orderInfo'
+            }).then(()=>{
+              console.log('insert')
+              this.step = 2
+              let info = {}
+              info.user_id = localStorage.getItem("auth_id")
+              info.order_course_ids = JSON.parse(this.functions.getLocalData('cart_ids'))
+              info.cart_parent_id = this.functions.getLocalData("cart_parent_id")
+              info.course_price = this.course_price
+              info.order_coupon_discount=this.order_price.order_coupon_discount
+              info.order_coupon_selected = this.discount_selected
+              this.$store.dispatch('putOrder', {
+                url:this.APIConfig.putOrder,
+                data:info
+              })
+            }).then(()=>{
+            })
+          }
+        }
+//               this.warning_dialog=true
+      },
+      backToCart(){
+        this.warning_dialog=false
+        web_routerConfig.push({'path':'/cart'})
+      }
+    },
+    computed:{
+      ...mapGetters(['orderInfo']),
+      coupon_info(){
+        let coupon_info = []
+        if(this.$store.getters.couponInfo.length>0){
+          coupon_info=this.$store.getters.couponInfo
+          let date=new Date()
+          for(let i in coupon_info){
+            coupon_info[i]['coupon_is_matched'] = coupon_info[i]['coupon_limit'] > this.course_price ? false : true
+            for(let k in coupon_info[i]){
+              if(k.indexOf('date')>=0){
+                date.setTime(coupon_info[i][k]*1000)
+                console.log(
+                  date.getYear()+1900,
+                  date.getMonth()+1,
+                  date.getDate()
+                )
+                coupon_info[i][k]=(date.getYear()+1900)+' 年 '+ (date.getMonth()+1)+' 月 '+ (date.getDate()) + ' 日 '
+              }
+            }
+          }
+        }
+        return coupon_info
+      },
+      //课程总价
+      course_price(){
+        let price=0;
+        this.orderInfo.map(item=>{
+          price += parseFloat(item.course_price)
+        })
+        return price.toFixed(2);
+      },
+      //获得最终总价
+      summary_price(){
+        return parseFloat(this.course_price - this.order_price.order_coupon_discount).toFixed(2);
+      },
+      payment(){
+        return this.$store.getters.payment
+      }
     }
+  }
 </script>

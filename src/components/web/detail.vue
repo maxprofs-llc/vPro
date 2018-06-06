@@ -238,149 +238,141 @@
     }
 </style>
 <script>
-    import Vue from 'vue'
-    import { mapGetters } from 'vuex'
-    import {Message} from 'element-ui'
-    import { web_routerConfig } from './../../config/RouterConfig'
-    export default {
-        created(){},
-        mounted(){
-            this.$store.dispatch("loadLessonDetail", { request_pattern:{'cid': this.$route.params.course_id } }).then(()=>{
-                let headFlag=false
-                this.flag=true
-                let crumb=this.lessonDetail.crumb
-                let detail=this.lessonDetail.detail
-                this.score=parseFloat(detail.course_score)
-                //目录生成
-                let lesson_list = this.lessonDetail.lesson_list
-                headFlag = false
-                for (let item of lesson_list) {
-                    if(item.lesson_is_chapter_head === '1'){
-                        headFlag = true
-                        break
-                    }
-                }
-                let list=[]
-                console.log(headFlag)
-                if(headFlag){
-                    for(let i of lesson_list) {
-                        if (i.lesson_is_chapter_head === '1') {
-                            let chapter = i
-                            i.lesson = []
-                            for (let item of lesson_list) {
-                                if (item.lesson_pid === i.lesson_id) {
-                                    chapter.lesson.push(item)
-                                }
-                            }
-                            list.push(chapter)
-                        }
-                    }
-                }else{
-                    let chapter={lesson:lesson_list, lesson_title:false}
-                    list.push(chapter)
-                }
-                this.list=list
-                console.log(list)
-            })
-        },
-        data(){
-            return{
-                flag:false,
-                list:{},
-                score:0
-            }
-        },
-        methods:{
-            enterVideo(obj) {
-              window.location.href = "http://"+window.location.host+"/#/play/?" + 'course_id=' + obj.lesson_course_id + '&' + 'lesson_id=' + obj.lesson_id
-            },
-          /**
-           * 加入购物车方法：
-           * 1. 首先验证用户是否登录，如果登录了，去后台根据cart_userid获取购物车信息
-           */
-            addToCart(){
-                let auth_token = localStorage.getItem('auth_token');
-                if(auth_token!=='undefined' && auth_token!==null){
-                    //有token记录，用户登录过
-                    if(this.functions.verifyTokenExpiration(auth_token)){
-                        //token未过期，直接发送给后台，加入购物车
-                        let cart_ref={
-                            'cart_userid': localStorage.getItem('auth_id')
-                        }
-                        this.$store.dispatch("loadCart", {url:this.APIConfig.loadCart, data:cart_ref, key:"cartInfo"}).then(()=>{
-//                            if(this.getCookie("cart")!==""){
-//                                let cookieCart = JSON.parse(this.getCookie("cart"))
-//
-//                            }
-                            let cart_id = this.cart_info.length===0?this.functions.genNonDuplicateID():this.cart_info[0]["cart_parent_id"]
-                            let cart_info = {
-                                'cart_userid': localStorage.getItem('auth_id'),
-                                cart_id,
-                                'cart_detail': []
-                            }
-                            let cartFlag = this.cart_info.map(item=>{
-                                    if(item.cart_course_id===this.lessonDetail.detail.course_id){
-                                        console.log("购物车已经存在该商品");
-                                        return false;
-                                    }
-                                    return true;
-                                })
-                            if(cartFlag){
-                                cart_info.cart_detail.push({cart_course_id: this.lessonDetail.detail.course_id, cart_parent_id:cart_id})
-                                this.$store.dispatch('addToCart', {url: this.APIConfig.addCart, data:cart_info})
-                            }
-                        })
-                    }else{
-                        //token已过期，需要重新获取token才可以加入购物车
-                    }
-                }else{
-                    //没有token，没有用户登陆过，直接生成cookie购物车
-                    let cookieCart = this.functions.getCookie('cart')
-                    console.log(cookieCart)
-                    if(cookieCart===""){
-                        cookieCart={
-                            cart_id:this.functions.genNonDuplicateID(),
-                            cart_detail:[]
-                        }
-                    }else{
-                        cookieCart = JSON.parse(cookieCart)
-                    }
-                    //如果购物车中有课程
-                    if(cookieCart.cart_detail.length!==0){
-                        let cart_detail=[]
-                        cart_detail = cookieCart.cart_detail
-                        let courseFlag = cart_detail.filter(item=>{
-                            if(item.cart_course_id === this.lessonDetail.detail.course_id){
-                                return true
-                            }
-                            return false
-                        })
-                        if(courseFlag.length>0){
-                            console.log("该课程已经存在于购物车！")
-                            return;
-                        }else{
-                            cookieCart.cart_detail.push({cart_course_id:this.lessonDetail.detail.course_id, cart_parent_id:cookieCart.cart_id, cart_is_cookie:1})
-                        }
-                    }else{
-                        //没有课程就直接加
-                        cookieCart.cart_detail.push({cart_course_id:this.lessonDetail.detail.course_id, cart_parent_id:cookieCart.cart_id, cart_is_cookie:1})
-                    }
-                    this.functions.setCookie("cart",JSON.stringify(cookieCart) ,30)
-                    console.log(cookieCart)
-                    this.$store.dispatch('addToCart', {url:this.APIConfig.cartDetail, data: cookieCart})
-                }
-
-
-            }
-        },
-        computed:{
-            auth_id(){
-                return this.$store.getters.auth_id
-            },
-            cart_info(){
-                return this.$store.getters.cartInfo
-            },
-            ...mapGetters(['lessonDetail'])
+  import Vue from 'vue'
+  import { mapGetters } from 'vuex'
+  import {Message} from 'element-ui'
+  import { web_routerConfig } from './../../config/RouterConfig'
+  export default {
+    created(){},
+    mounted(){
+      this.$store.dispatch("loadLessonDetail", { request_pattern:{'cid': this.$route.params.course_id } }).then(()=>{
+        let headFlag=false
+        this.flag=true
+        let crumb=this.lessonDetail.crumb
+        let detail=this.lessonDetail.detail
+        this.score=parseFloat(detail.course_score)
+        //目录生成
+        let lesson_list = this.lessonDetail.lesson_list
+        headFlag = false
+        for (let item of lesson_list) {
+          if(item.lesson_is_chapter_head === '1'){
+            headFlag = true
+            break
+          }
         }
+        let list=[]
+        console.log(headFlag)
+        if(headFlag){
+          for(let i of lesson_list) {
+            if (i.lesson_is_chapter_head === '1') {
+              let chapter = i
+              i.lesson = []
+              for (let item of lesson_list) {
+                if (item.lesson_pid === i.lesson_id) {
+                  chapter.lesson.push(item)
+                }
+              }
+              list.push(chapter)
+            }
+          }
+        }else{
+          let chapter={lesson:lesson_list, lesson_title:false}
+          list.push(chapter)
+        }
+        this.list=list
+        console.log(list)
+      })
+    },
+    data(){
+      return{
+        flag:false,
+        list:{},
+        score:0
+      }
+    },
+    methods:{
+      enterVideo(obj) {
+        window.location.href = "http://"+window.location.host+"/#/play/?" + 'course_id=' + obj.lesson_course_id + '&' + 'lesson_id=' + obj.lesson_id
+      },
+      /**
+       * 加入购物车方法：
+       * 1. 首先验证用户是否登录，如果登录了，去后台根据cart_userid获取购物车信息
+       */
+      addToCart(){
+        let auth_token = localStorage.getItem('auth_token');
+        if(auth_token!=='undefined' && auth_token!==null){
+          //有token记录，用户登录过
+          if(this.functions.verifyTokenExpiration(auth_token)){
+            //token未过期，直接发送给后台，加入购物车
+            let cart_ref={
+              'cart_userid': localStorage.getItem('auth_id')
+            }
+            this.$store.dispatch("loadCart", {url:this.APIConfig.loadCart, data:cart_ref, key:"cartInfo"}).then(()=>{
+              let cart_id = this.cartInfo.length===0?this.functions.genNonDuplicateID():this.cartInfo[0]["cart_parent_id"]
+              let cartInfo = {
+                'cart_userid': localStorage.getItem('auth_id'),
+                cart_id,
+                'cart_detail': []
+              }
+              let cartFlag = this.cartInfo.map(item=>{
+                if(item.cart_course_id===this.lessonDetail.detail.course_id){
+                  console.log("购物车已经存在该商品");
+                  return false;
+                }
+                return true;
+              })
+              if(cartFlag){
+                cartInfo.cart_detail.push({cart_course_id: this.lessonDetail.detail.course_id, cart_parent_id:cart_id})
+                this.$store.dispatch('addToCart', {url: this.APIConfig.addCart, data:cartInfo})
+              }
+            })
+          }else{
+            //token已过期，需要重新获取token才可以加入购物车
+          }
+        }else{
+          //没有token，没有用户登陆过，直接生成cookie购物车
+          let cookieCart = this.functions.getCookie('cart')
+          console.log(cookieCart)
+          
+          if(cookieCart === ""){
+            cookieCart={
+              cart_id:this.functions.genNonDuplicateID(),
+              cart_detail:[]
+            }
+          }else{
+            cookieCart = JSON.parse(cookieCart)
+          }
+          //如果购物车中有课程
+          if(cookieCart.cart_detail.length!==0){
+            let cart_detail=[]
+            cart_detail = cookieCart.cart_detail
+            let courseFlag = cart_detail.filter(item=>{
+              if(item.cart_course_id === this.lessonDetail.detail.course_id){
+                return true
+              }
+              return false
+            })
+            if(courseFlag.length>0){
+              console.log("该课程已经存在于购物车！")
+              return;
+            }else{
+              cookieCart.cart_detail.push({cart_course_id:this.lessonDetail.detail.course_id, cart_parent_id:cookieCart.cart_id, cart_is_cookie:1})
+            }
+          }else{
+            //没有课程就直接加
+            cookieCart.cart_detail.push({cart_course_id:this.lessonDetail.detail.course_id, cart_parent_id:cookieCart.cart_id, cart_is_cookie:1})
+          }
+          this.functions.setCookie("cart",JSON.stringify(cookieCart) ,30)
+          console.log(cookieCart)
+          this.$store.dispatch('addToCart', {url:this.APIConfig.cartDetail, data: cookieCart})
+        }
+      }
+    },
+    computed:{
+      auth_id(){
+        return this.$store.getters.auth_id
+      },
+      ...mapGetters(['lessonDetail', 'cartInfo'])
     }
+  }
 </script>
