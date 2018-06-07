@@ -23,6 +23,7 @@ import { getters } from './../store/getters'
 import PlayerModule from "../store/modules/playerModule";
 import CartModule from "../store/modules/CartModule";
 import CouponModule from "../store/modules/CouponModule";
+import OrderModule from "../store/modules/OrderModule";
 require('./extend')
 require('rgbaster/rgbaster.js')
 
@@ -47,7 +48,8 @@ const vuex_store = new Vuex.Store({
     category: CategoryModule,
     player: PlayerModule,
     Cart: CartModule,
-    Coupon: CouponModule
+    Coupon: CouponModule,
+    Order: OrderModule
   },
   getters: getters
 });

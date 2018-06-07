@@ -10,6 +10,8 @@ export default{
   /**
    * 该函数用来复制对象内容，如果直接那个使用obja=objb，实际上并不是传递值，而是地址，所以a的改变直接导致b也改变了！！！
    * 该函数可以理解为对值的传递。
+   * 首先创建一个空对象，然后迭代传入的对象，检查键值对，如果值是对象，那么判断是否是数组，根据数组和对象，创建不同的初值。
+   * 然后递归，继续检查值下面的
    * @param p
    * @param c
    * @returns {*|{}}
@@ -35,7 +37,7 @@ export default{
   verifyTokenExpiration(auth_token){
     let payload = KJUR.jws.JWS.readSafeJSONString(b64utoutf8(auth_token.split(".")[1]))
     if(payload.auth_id && payload.auth_appid && payload.exp) {
-      return (parseInt(payload.exp) > parseInt(String((new Date()).getTime()).substr(0, 10)))?true:false
+      return (parseInt(payload.exp) > parseInt(String((new Date()).getTime()).substr(0, 10))) ? true : false
     }
   },
   setCookie(name,value,myDay){
@@ -110,16 +112,16 @@ export default{
     for(const key in data) {
       enData[key] =  jsencrypt.encrypt(data[key])
     }
-    return enData;
+    return enData
   },
   // 判断优惠券是否符合限制（金额限制和时间限制）
-  coupon_info(originCouponInfo, ) {
+  checkCouponInfo(originCouponInfo, coursePrice) {
     let couponInfo = []
-    if(originCouponInfo.length > 0){
-      let date=new Date()
-      for(let i in couponInfo) {
+    if(originCouponInfo.length > 0) {
+      let date = new Date()
+      for (let i in originCouponInfo) {
         // 判断优惠券的金额是否满足限制
-        couponInfo[i]['coupon_is_matched'] = couponInfo[i]['coupon_limit'] <= this.course_price
+        couponInfo[i]['coupon_is_matched'] = couponInfo[i]['coupon_limit'] <= coursePrice
         for(let k in couponInfo[i]) {
           if(k.indexOf('date') >= 0){
             date.setTime(couponInfo[i][k] * 1000)

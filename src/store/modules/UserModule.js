@@ -198,6 +198,7 @@ export default{
       return state.step;
     },
     auth_appid:state=>state.userObj.auth_appid,
-    auth_id:state=>state.userObj.auth_id
+    auth_id:state=>state.userObj.auth_id,
+    auth_token:state=>state.userObj.auth_token,
   }
 }
