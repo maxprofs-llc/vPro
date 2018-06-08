@@ -104,17 +104,17 @@ export default{
                     });
                 })
         },
-        addToCart(context, {url, data}){
-            return Axios.post(url,data).then(res=>{
-                if(res.data.hasOwnProperty("status")){
-                    if(res.data.status){
-                        context.commit('delCartInfo', {key:"cartInfo",course_id:res.data.course_id})
-                    }
-                }
-            }).catch(err=>{
-                console.log(err)
-            })
-        },
+        // addToCart(context, {url, data}){
+        //     return Axios.post(url,data).then(res=>{
+        //         if(res.data.hasOwnProperty("status")){
+        //             if(res.data.status){
+        //                 context.commit('delCartInfo', {key:"cartInfo",course_id:res.data.course_id})
+        //             }
+        //         }
+        //     }).catch(err=>{
+        //         console.log(err)
+        //     })
+        // },
         putOrder(context, {url, data, key}){
             return Axios.post(url, data).then(res=>{
                 console.log(res.data)

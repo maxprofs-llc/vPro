@@ -290,6 +290,18 @@
       }
     },
     methods:{
+      initCart() {
+        if(this.auth_token !== 'undefined' && this.auth_token !== null) {
+          //有token记录，用户登录过
+          if(this.functions.verifyTokenExpiration(this.auth_token)) {
+            this.$store.dispatch('loadCart', { 'cart_userid': this.auth_id }).then(() => {
+
+            })
+          }
+        } else {
+
+        }
+      },
       enterVideo(obj) {
         window.location.href = "http://"+window.location.host+"/#/play/?" + 'course_id=' + obj.lesson_course_id + '&' + 'lesson_id=' + obj.lesson_id
       },
@@ -309,14 +321,16 @@
               'cart_userid': this.auth_id
             }
             this.$store.dispatch("loadCart", cart_ref).then(() => {
-              let cart_id = this.cartInfo.length === 0 ? this.functions.genNonDuplicateID() : this.cartInfo[0]["cart_parent_id"]
+              // 获得购物车信息，如果cartId为-1说明没有购物车信息，需要下次创建；否则说明已经有购物车条目了。
+              let cart_id = this.cartInfo.cartId === -1 ? this.functions.genNonDuplicateID() : this.cartInfo.cartId
               let cartInfo = {
                 'cart_userid': this.auth_id,
                 cart_id,
+                'cart_is_existed': this.cartInfo.cartId === -1 ? 0 : 1,
                 'cart_detail': []
               }
               // 判断购物车是否有这个商品
-              if(!this.courseIsExisted(this.cartInfo))
+              if (!this.courseIsExisted(this.cartInfo.cartInfo))
               {
                 cartInfo.cart_detail.push({ cart_course_id: this.lessonDetail.detail.course_id, cart_parent_id: cart_id })
                 // 没有就去添加
@@ -325,6 +339,7 @@
             })
           } else {
             //token已过期，需要重新获取token才可以加入购物车，需要调用登陆模块
+            this.$root.$emit("showLogin")
           }
         } else {
           //没有token，没有用户登陆过，直接生成cookie购物车，本地购物车
