@@ -209,13 +209,13 @@
     .main-adv{
         padding:4px 10px;
         margin:5px 2px;
-        background:red;
-        font-size:18px;
+        background:#FF4949;
         color:#fff;
         display:inline-block;
         height:24px;
         line-height:24px;
         border-radius:16px;
+        font-size: 15px;
     }
     .main-btn{
         position:absolute;
@@ -243,8 +243,7 @@
   import {Message} from 'element-ui'
   import { web_routerConfig } from './../../config/RouterConfig'
   export default {
-    created(){},
-    mounted(){
+    mounted() {
       this.$store.dispatch("loadLessonDetail", { request_pattern:{'cid': this.$route.params.course_id } }).then(()=>{
         let headFlag=false
         this.flag=true
@@ -296,83 +295,92 @@
       },
       /**
        * 加入购物车方法：
-       * 1. 首先验证用户是否登录，如果登录了，去后台根据cart_userid获取购物车信息
+       * 1. 首先验证用户是否登录
+       *    1. 如果登录了，去后台根据cart_userid获取购物车信息
+       *    2. 没有登录，直接判断cookie中是否存在购物车信息，存在添加，不存在新建，同时后台插入一份
+       *
        */
       addToCart(){
-        let auth_token = localStorage.getItem('auth_token');
-        if(auth_token!=='undefined' && auth_token!==null){
+        if(this.auth_token !== 'undefined' && this.auth_token !== null){
           //有token记录，用户登录过
-          if(this.functions.verifyTokenExpiration(auth_token)){
+          if(this.functions.verifyTokenExpiration(this.auth_token)) {
             //token未过期，直接发送给后台，加入购物车
-            let cart_ref={
-              'cart_userid': localStorage.getItem('auth_id')
+            let cart_ref = {
+              'cart_userid': this.auth_id
             }
-            this.$store.dispatch("loadCart", {url:this.APIConfig.loadCart, data:cart_ref, key:"cartInfo"}).then(()=>{
-              let cart_id = this.cartInfo.length===0?this.functions.genNonDuplicateID():this.cartInfo[0]["cart_parent_id"]
+            this.$store.dispatch("loadCart", cart_ref).then(() => {
+              let cart_id = this.cartInfo.length === 0 ? this.functions.genNonDuplicateID() : this.cartInfo[0]["cart_parent_id"]
               let cartInfo = {
-                'cart_userid': localStorage.getItem('auth_id'),
+                'cart_userid': this.auth_id,
                 cart_id,
                 'cart_detail': []
               }
-              let cartFlag = this.cartInfo.map(item=>{
-                if(item.cart_course_id===this.lessonDetail.detail.course_id){
-                  console.log("购物车已经存在该商品");
-                  return false;
-                }
-                return true;
-              })
-              if(cartFlag){
-                cartInfo.cart_detail.push({cart_course_id: this.lessonDetail.detail.course_id, cart_parent_id:cart_id})
-                this.$store.dispatch('addToCart', {url: this.APIConfig.addCart, data:cartInfo})
+              // 判断购物车是否有这个商品
+              if(!this.courseIsExisted(this.cartInfo))
+              {
+                cartInfo.cart_detail.push({ cart_course_id: this.lessonDetail.detail.course_id, cart_parent_id: cart_id })
+                // 没有就去添加
+                this.$store.dispatch('addToCart', cartInfo)
               }
             })
-          }else{
-            //token已过期，需要重新获取token才可以加入购物车
+          } else {
+            //token已过期，需要重新获取token才可以加入购物车，需要调用登陆模块
           }
-        }else{
-          //没有token，没有用户登陆过，直接生成cookie购物车
+        } else {
+          //没有token，没有用户登陆过，直接生成cookie购物车，本地购物车
           let cookieCart = this.functions.getCookie('cart')
           console.log(cookieCart)
-          
-          if(cookieCart === ""){
-            cookieCart={
+          // cookie中没有购物车记录，则直接创建新cookiecart
+          if(cookieCart === "") {
+            cookieCart = {
               cart_id:this.functions.genNonDuplicateID(),
               cart_detail:[]
             }
-          }else{
+          } else {
             cookieCart = JSON.parse(cookieCart)
           }
-          //如果购物车中有课程
-          if(cookieCart.cart_detail.length!==0){
-            let cart_detail=[]
+          //如果购物车中有课程，就去判断课程是否已经存在
+          if(cookieCart.cart_detail.length !== 0) {
+            let cart_detail = []
             cart_detail = cookieCart.cart_detail
-            let courseFlag = cart_detail.filter(item=>{
-              if(item.cart_course_id === this.lessonDetail.detail.course_id){
-                return true
-              }
-              return false
-            })
-            if(courseFlag.length>0){
-              console.log("该课程已经存在于购物车！")
-              return;
-            }else{
-              cookieCart.cart_detail.push({cart_course_id:this.lessonDetail.detail.course_id, cart_parent_id:cookieCart.cart_id, cart_is_cookie:1})
+            // 筛查课程是否存在，不存在才插入， 这里的逻辑要改，复杂化了
+            if (!this.courseIsExisted(cart_detail)) {
+              cookieCart.cart_detail.push({ cart_course_id: this.lessonDetail.detail.course_id, cart_parent_id: cookieCart.cart_id, cart_is_cookie: 1 })
             }
-          }else{
+          } else {
             //没有课程就直接加
-            cookieCart.cart_detail.push({cart_course_id:this.lessonDetail.detail.course_id, cart_parent_id:cookieCart.cart_id, cart_is_cookie:1})
+            cookieCart.cart_detail.push({ cart_course_id: this.lessonDetail.detail.course_id, cart_parent_id: cookieCart.cart_id, cart_is_cookie: 1})
           }
           this.functions.setCookie("cart",JSON.stringify(cookieCart) ,30)
           console.log(cookieCart)
-          this.$store.dispatch('addToCart', {url:this.APIConfig.cartDetail, data: cookieCart})
+          this.$store.dispatch('addToCart', cookieCart)
         }
+      },
+      /**
+       * 筛查课程是否存在于购物车中
+       * @param cart
+       * @param course
+       * @returns {boolean}
+       */
+      courseIsExisted(cart) {
+        for(let c of cart)
+        {
+          if (c.cart_course_id === this.lessonDetail.detail.course_id) {
+            this.$notify.error({
+              title: '错误',
+              message: '购物车中已存在该商品'
+            });
+            return true
+          }
+        }
+        return false
       }
     },
     computed:{
       auth_id(){
         return this.$store.getters.auth_id
       },
-      ...mapGetters(['lessonDetail', 'cartInfo'])
+      ...mapGetters(['lessonDetail', 'cartInfo', 'auth_token', 'auth_id'])
     }
   }
 </script>

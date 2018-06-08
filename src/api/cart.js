@@ -7,6 +7,13 @@ export function loadCart(data) {
     data
   })
 }
+export function addCart(data) {
+  return request({
+    'url': 'api/cart/addcart',
+    'method': 'post',
+    data
+  })
+}
 export function checkCourses(data) {
   return request({
     'url': '/api/product/checkcourses',

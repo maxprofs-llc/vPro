@@ -172,11 +172,10 @@
   import {web_routerConfig} from './../../config/RouterConfig'
   export default{
     mounted(){
-      if(localStorage.getItem("auth_token") !== undefined || localStorage.getItem("auth_token") !== null){
-        let auth_token = localStorage.getItem("auth_token")
-        if(this.functions.verifyTokenExpiration(auth_token)){
+      if(this.auth_token !== undefined || this.auth_token !== null){
+        if(this.functions.verifyTokenExpiration(this.auth_token)){
           let cart_ref={
-            'cart_userid': localStorage.getItem('auth_id')
+            'cart_userid': this.auth_id
           }
           this.$store.dispatch("loadCart", cart_ref).then(() => {
             if(this.cartInfo.length > 0) {
@@ -247,19 +246,19 @@
         this.priceSummary()
       },
       deleteCartItem(course_id){
-        let originCart={}
+        let originCart = {}
         let cart = {}
-        if(localStorage.getItem("auth_token")===null||localStorage.getItem("auth_token")===undefined){
+        if(this.auth_token === null || this.auth_token === undefined){
           cart = JSON.parse(this.functions.getCookie("cart"))
           originCart = cart.cart_detail
           cart["is_login"]=false
         }else{
           originCart = this.cartInfo
           cart["is_login"]=true
-          cart['cart_userid']=localStorage.getItem('auth_id')
+          cart['cart_userid'] = this.auth_id
         }
-        cart.cart_detail=originCart.filter(item=>{
-          if(item.cart_course_id==course_id){
+        cart.cart_detail = originCart.filter(item => {
+          if(item.cart_course_id === course_id){
             return true
           }
           return false
@@ -298,7 +297,7 @@
       }
     },
     computed:{
-      ...mapGetters(['cartInfo', 'orderInfo']),
+      ...mapGetters(['cartInfo', 'orderInfo', 'auth_id', 'auth_token']),
     }
   }
 </script>

@@ -1,4 +1,4 @@
-import { loadCart, checkCourses } from "../../api/cart"
+import { loadCart, addCart, checkCourses } from "../../api/cart"
 export default{
   state: {
     cartInfo: [],
@@ -31,6 +31,27 @@ export default{
         }).catch(err => {
           reject(err)
         })
+      })
+    },
+    addToCart(context, data) {
+      return new Promise((resolve, reject) => {
+        addCart(data).then((res) => {
+          console.log(res)
+        })
+      })
+
+
+
+
+
+      return Axios.post(url,data).then(res=>{
+        if(res.data.hasOwnProperty("status")){
+          if(res.data.status){
+            context.commit('delCartInfo', {key:"cartInfo",course_id:res.data.course_id})
+          }
+        }
+      }).catch(err=>{
+        console.log(err)
       })
     },
   },
